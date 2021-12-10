@@ -160,7 +160,7 @@ def run_eval(model, in_loader, out_loader, logger, args, num_classes):
         temp_x = Variable(temp_x).cuda()
         temp_list = model(x=temp_x, layer_index='all')[1]
         num_output = len(temp_list)
-
+        print("num output", num_output)
         logger.info("Processing in-distribution data...")
         in_scores = iterate_data_mahalanobis(in_loader, model, num_classes, sample_mean, precision,
                                              num_output, magnitude, regressor, logger)

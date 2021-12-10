@@ -11,8 +11,10 @@ import os
 from torch.autograd import Variable
 from utils.mahalanobis_lib import sample_estimator, get_Mahalanobis_score
 import torch.nn as nn
+import pickle5 as pickle
 from sklearn.linear_model import LogisticRegressionCV
 
+torch.cuda.empty_cache()
 
 torch.manual_seed(1)
 torch.cuda.manual_seed(1)
@@ -120,9 +122,10 @@ def tune_mahalanobis_hyperparams(args, model, num_classes, train_loader, val_loa
         target = torch.tensor(train_in_label[i*args.batch_size:min((i+1)*args.batch_size, m)])
         data = data.cuda()
         target = target.cuda()
-        data, target = Variable(data, volatile=True), Variable(target)
+        # data, target = Variable(data, volatile=True), Variable(target) ## rd: commented
+        data, target = Variable(data, requires_grad=False), Variable(target) ## rd: added
         # output = model(data)
-
+        print("args.batch_size", args.batch_size)
         model.zero_grad()
         inputs = Variable(data.data, requires_grad=True).cuda()
         output = model(inputs)
@@ -144,7 +147,8 @@ def tune_mahalanobis_hyperparams(args, model, num_classes, train_loader, val_loa
         target = torch.tensor(val_in_label[i*args.batch_size:min((i+1)*args.batch_size, m)])
         data = data.cuda()
         target = target.cuda()
-        data, target = Variable(data, volatile=True), Variable(target)
+        # data, target = Variable(data, volatile=True), Variable(target) ## rd: commented
+        data, target = Variable(data, requires_grad=False), Variable(target) ## rd: added
         # output = model(data)
 
         model.zero_grad()
@@ -187,7 +191,8 @@ def tune_mahalanobis_hyperparams(args, model, num_classes, train_loader, val_loa
             train_lr_Mahalanobis.extend(Mahalanobis_scores)
 
         train_lr_Mahalanobis = np.asarray(train_lr_Mahalanobis, dtype=np.float32)
-        regressor = LogisticRegressionCV(n_jobs=-1).fit(train_lr_Mahalanobis, train_lr_label)
+        # regressor = LogisticRegressionCV(n_jobs=-1).fit(train_lr_Mahalanobis, train_lr_label) ## rd: commented
+        regressor = LogisticRegressionCV(n_jobs=1).fit(train_lr_Mahalanobis, train_lr_label) ## rd: added
 
         logger.info('Logistic Regressor params: {} {}'.format(regressor.coef_, regressor.intercept_))
 
@@ -267,7 +272,6 @@ def tune_mahalanobis_hyperparams(args, model, num_classes, train_loader, val_loa
 
 def main(args):
     logger = log.setup_logger(args)
-
     # Lets cuDNN benchmark conv implementations and choose the fastest.
     # Only good if sizes stay the same within the main loop!
     torch.backends.cudnn.benchmark = True

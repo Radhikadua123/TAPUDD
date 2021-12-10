@@ -2,14 +2,14 @@
 
 MODEL=BiT-S-R101x1
 
-python finetune.py \
+CUDA_VISIBLE_DEVICES=2,3 python finetune.py \
 --name finetune_group_softmax_${MODEL} \
 --model ${MODEL} \
 --bit_pretrained_dir bit_pretrained_models \
---logdir checkpoints/finetune \
+--logdir /home/radhika/mos1/checkpoints/finetune \
 --dataset imagenet2012 \
---eval_every 200 \
---datadir dataset/id_data/ILSVRC-2012 \
+--eval_every 10 \
+--datadir /home/data_storage/imagenet/v12 \
 --train_list data_lists/imagenet2012_group_softmax_train_list.txt \
 --val_list data_lists/imagenet2012_group_softmax_val_list.txt \
 --num_block_open 0 \
