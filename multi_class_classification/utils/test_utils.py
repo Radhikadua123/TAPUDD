@@ -1,9 +1,10 @@
+import os
 import argparse
 import torchvision as tv
 import torch
 import numpy as np
 import sklearn.metrics as sk
-
+import matplotlib.pyplot as plt
 
 def arg_parser():
     parser = argparse.ArgumentParser()
@@ -127,3 +128,81 @@ def get_measures(in_examples, out_examples):
     examples = np.squeeze(-np.vstack((in_examples, out_examples)))
     aupr_out = sk.average_precision_score(labels_rev, examples)
     return auroc, aupr_in, aupr_out, fpr
+
+
+def plot_aupr_auroc(in_examples, out_examples, path):
+    num_in = in_examples.shape[0]
+    num_out = out_examples.shape[0]
+
+    # logger.info("# in example is: {}".format(num_in))
+    # logger.info("# out example is: {}".format(num_out))
+
+    labels = np.zeros(num_in + num_out, dtype=np.int32)
+    labels[:num_in] += 1
+
+    examples = np.squeeze(np.vstack((in_examples, out_examples)))
+    # aupr_in = sk.average_precision_score(labels, examples)
+    # auroc = sk.roc_auc_score(labels, examples)
+
+    fpr, tpr, _ = sk.roc_curve(labels, examples)
+    prec, recall, _ = sk.precision_recall_curve(labels, examples)
+    thres = num_in/(num_in + num_out)
+    # recall_level = 0.95
+    # fpr = fpr_and_fdr_at_recall(labels, examples, recall_level)
+
+    labels_rev = np.zeros(num_in + num_out, dtype=np.int32)
+    labels_rev[num_in:] += 1
+    examples = np.squeeze(-np.vstack((in_examples, out_examples)))
+    # aupr_out = sk.average_precision_score(labels_rev, examples)
+
+    prec_out, recall_out, _ = sk.precision_recall_curve(labels_rev, examples)
+    thres_out = num_out/(num_in + num_out)
+
+    auc_roc = sk.auc(fpr, tpr)
+    auc_aupr_in = sk.auc(recall, prec)
+    auc_aupr_out = sk.auc(recall_out, prec_out)
+
+    print("auc roc", auc_roc)
+    print("auc aupr in", auc_aupr_in)
+    print("auc aupr out", auc_aupr_out)
+
+    plt.figure()
+    plt.plot(recall, prec, 'm', label="")
+    plt.plot([-0.02, 1.02], [thres, thres], 'k--', label="")
+    plt.xlim([-0.02, 1.02])
+    plt.ylim([-0.02, 1.02])
+    plt.title("AUPR (In)")
+    plt.ylabel("Precision")
+    plt.xlabel("Recall")
+    plt.grid()
+    plt.gca().set_aspect('equal', adjustable='box')
+    path1 = os.path.join(path, 'AUPR_in.png')
+    plt.savefig(path1, bbox_inches='tight', dpi=300)
+
+    plt.figure()
+    plt.plot(recall_out, prec_out, 'm', label="")
+    plt.plot([-0.02, 1.02], [thres_out, thres_out], 'k--', label="")
+    plt.xlim([-0.02, 1.02])
+    plt.ylim([-0.02, 1.02])
+    plt.title("AUPR (Out)")
+    plt.ylabel("Precision")
+    plt.xlabel("Recall")
+    plt.grid()
+    plt.gca().set_aspect('equal', adjustable='box')
+    path1 = os.path.join(path, 'AUPR_out.png')
+    plt.savefig(path1, bbox_inches='tight', dpi=300)
+
+    plt.figure()
+    plt.plot(fpr, tpr, 'm', label="")
+    plt.plot([-0.02, 1.02], [-0.02, 1.02], 'k--', label="")
+    plt.xlim([-0.02, 1.02])
+    plt.ylim([-0.02, 1.02])
+    plt.title("AUROC")
+    plt.ylabel("TPR")
+    plt.xlabel("FPR")
+    plt.grid()
+    plt.gca().set_aspect('equal', adjustable='box')
+    path1 = os.path.join(path, 'AUROC.png')
+    plt.savefig(path1, bbox_inches='tight', dpi=300)
+
+    return auc_roc, auc_aupr_in, auc_aupr_out
