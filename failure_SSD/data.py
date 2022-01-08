@@ -84,6 +84,74 @@ def cifar10(
     return train_loader, test_loader, norm_layer
 
 
+def cifar10_ood(
+    data_dir, intensity, batch_size=32, mode="base", normalize=True, norm_layer=None, size=32
+):
+    """
+    mode: org | base | ssl
+    """
+    transform_train = [
+        transforms.Resize(size),
+        transforms.RandomCrop(size, padding=4),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+    ]
+    transform_test = [transforms.Resize(size), transforms.ColorJitter([intensity, intensity], 0, 0, 0), transforms.ToTensor()]
+
+    if mode == "org":
+        None
+    elif mode == "base":
+        transform_train = [transforms.Resize(size), transforms.ToTensor()]
+    elif mode == "ssl":
+        transform_train = [
+            transforms.RandomResizedCrop(size, scale=(0.2, 1.0)),
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
+            transforms.RandomGrayscale(p=0.2),
+            transforms.ToTensor(),
+        ]
+    else:
+        raise ValueError(f"{mode} mode not supported")
+
+    if norm_layer is None:
+        norm_layer = transforms.Normalize(
+            mean=[0.491, 0.482, 0.447], std=[0.202, 0.199, 0.201]
+        )
+    
+    if normalize:
+        transform_train.append(norm_layer)
+        transform_test.append(norm_layer)
+
+    transform_train = transforms.Compose(transform_train)
+    transform_test = transforms.Compose(transform_test)
+
+    if mode == "ssl":
+        transform_train = TwoCropTransform(transform_train)
+
+    trainset = datasets.CIFAR10(
+        root=os.path.join(data_dir, "cifar10"),
+        train=True,
+        download=True,
+        transform=transform_train,
+    )
+    testset = datasets.CIFAR10(
+        root=os.path.join(data_dir, "cifar10"),
+        train=False,
+        download=True,
+        transform=transform_test,
+    )
+
+    train_loader = DataLoader(
+        trainset, batch_size=batch_size, shuffle=True, num_workers=4, pin_memory=True
+    )
+    test_loader = DataLoader(
+        testset, batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True
+    )
+
+    return train_loader, test_loader, norm_layer
+
+
+
 def cifar100(
     data_dir, batch_size, mode="base", normalize=True, norm_layer=None, size=32
 ):

@@ -13,6 +13,7 @@ import torch
 import torch.nn as nn
 
 from models import SupResNet, SSLResNet
+import data
 from utils import (
     get_features,
     get_roc_sklearn,
@@ -20,7 +21,7 @@ from utils import (
     get_fpr,
     get_scores_one_cluster,
 )
-import data
+
 
 # local utils for SSD evaluation
 def get_scores(ftrain, ftest, food, labelstrain, args):
@@ -103,7 +104,7 @@ def get_eval_results(ftrain, ftest, food, labelstrain, args):
 def main():
     parser = argparse.ArgumentParser(description="SSD evaluation")
 
-    parser.add_argument("--exp-name", type=str, default="temp_eval_ssd")
+    parser.add_argument("--exp-name", type=str, default="cifar10_6.0")
     parser.add_argument(
         "--training-mode", type=str, choices=("SimCLR", "SupCon", "SupCE")
     )
@@ -115,7 +116,7 @@ def main():
 
     parser.add_argument("--dataset", type=str, default="cifar10")
     parser.add_argument(
-        "--data-dir", type=str, default="/data/data_vvikash/fall20/SSD/datasets/"
+        "--data-dir", type=str, default="datasets/"
     )
     parser.add_argument(
         "--data-mode", type=str, choices=("org", "base", "ssl"), default="base"
@@ -127,6 +128,7 @@ def main():
     parser.add_argument("--gpu", type=str, default="0")
     parser.add_argument("--ckpt", type=str, help="checkpoint path")
     parser.add_argument("--seed", type=int, default=12345)
+    parser.add_argument("--intensity", type=float, default=4.0)
 
     args = parser.parse_args()
     device = "cuda:0"
@@ -136,7 +138,7 @@ def main():
     if not os.path.isdir(args.results_dir):
         os.mkdir(args.results_dir)
 
-    results_file = os.path.join(args.results_dir, args.exp_name + "_ssd.txt")
+    results_file = os.path.join(args.results_dir, "id_pos_"+ args.exp_name + ".txt")
 
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     logger = logging.getLogger()
@@ -179,18 +181,30 @@ def main():
     features_test, _ = get_features(model.encoder, test_loader)
     print("In-distribution features shape: ", features_train.shape, features_test.shape)
 
-    ds = ["cifar10", "cifar100", "svhn", "texture", "blobs"]
+    # ds = ["cifar10", "cifar100", "svhn", "texture", "blobs"]
+    ds = ["cifar10", "cifar10_ood"]
     ds.remove(args.dataset)
 
     for d in ds:
-        _, ood_loader, _ = data.__dict__[d](
+        if (d == "cifar10_ood"):
+            _, ood_loader, _ = data.__dict__[d](
             args.data_dir,
+            args.intensity,
             args.batch_size,
             mode="base",
             normalize=args.normalize,
             norm_layer=norm_layer,
             size=args.size,
         )
+        else:
+            _, ood_loader, _ = data.__dict__[d](
+                args.data_dir,
+                args.batch_size,
+                mode="base",
+                normalize=args.normalize,
+                norm_layer=norm_layer,
+                size=args.size,
+            )
         features_ood, _ = get_features(model.encoder, ood_loader)
         print("Out-of-distribution features shape: ", features_ood.shape)
 

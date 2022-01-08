@@ -196,21 +196,22 @@ def knn(model, device, val_loader, criterion, args, writer, epoch=0):
 
 #### OOD detection ####
 def get_roc_sklearn(xin, xood):
-    labels = [0] * len(xin) + [1] * len(xood)
+    labels = [1] * len(xin) + [0] * len(xood)
     data = np.concatenate((xin, xood))
     auroc = skm.roc_auc_score(labels, data)
     return auroc
 
 
 def get_pr_sklearn(xin, xood):
-    labels = [0] * len(xin) + [1] * len(xood)
+    labels = [1] * len(xin) + [0] * len(xood)
     data = np.concatenate((xin, xood))
     aupr = skm.average_precision_score(labels, data)
     return aupr
 
 
 def get_fpr(xin, xood):
-    return np.sum(xood < np.percentile(xin, 95)) / len(xood)
+    # return np.sum(xood < np.percentile(xin, 95)) / len(xood)
+    return np.sum(xin < np.percentile(xood, 95)) / len(xin)
 
 
 def get_scores_one_cluster(ftrain, ftest, food, shrunkcov=False):
@@ -221,7 +222,7 @@ def get_scores_one_cluster(ftrain, ftest, food, shrunkcov=False):
         cov = lambda x: np.cov(x.T, bias=True)
 
     # ToDO: Simplify these equations
-    dtest = np.sum(
+    dtest = -np.sum(
         (ftest - np.mean(ftrain, axis=0, keepdims=True))
         * (
             np.linalg.pinv(cov(ftrain)).dot(
@@ -231,7 +232,7 @@ def get_scores_one_cluster(ftrain, ftest, food, shrunkcov=False):
         axis=-1,
     )
 
-    dood = np.sum(
+    dood = -np.sum(
         (food - np.mean(ftrain, axis=0, keepdims=True))
         * (
             np.linalg.pinv(cov(ftrain)).dot(
