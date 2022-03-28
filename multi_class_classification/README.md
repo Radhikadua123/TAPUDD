@@ -43,6 +43,7 @@ bash ./scripts/tune_mahalanobis.sh
 
 ## OOD Detection Results
 
-MOS achieves state-of-the-art performance averaged on the 4 OOD datasets.
+OOD detection performance comparison between TAPUDD method and baselines. Our method detects samples from Textures more OOD compared to samples from iNaturalist, SUN, Places (similar to the way humans perceive).
 
-![results](figs/multi_class.png)
+![results](fig/multi-class-results.png)
+![pca_results](fig/pca5.pdf)
