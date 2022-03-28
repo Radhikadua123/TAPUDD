@@ -30,8 +30,7 @@ from matplotlib.patches import Ellipse
 import plotly.graph_objs as go
 from scipy.stats import gaussian_kde
 from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
-# import mpl_scatter_density # adds projection='scatter_density'
-# from matplotlib.colors import LinearSegmentedColormap
+
 
 def visualization_density_hexbin(args, train_Df, oods, path1):
     total_df = []
@@ -156,17 +155,19 @@ def visualization_density_gaussian_kde(args, train_Df, oods, path1):
 
     if (path1 == f'/home/radhika/mos1/checkpoints/pca_plots_density_{args.density_type}_separate/imagenet.png'):
         name1 =  "ID data"
-        fig = ax.scatter(x, y, c=z, s=0.03, marker = "o", label = name1)
-        plt.colorbar(fig, label='point density') 
+        # fig = ax.scatter(x, y, c=z, s=0.04, marker = "o", label = name1, cmap="Reds")
+        fig = ax.scatter(x, y, c=z, s=0.03, marker = "o", cmap="Reds")
+        plt.colorbar(fig, label='density') 
 
     ood1 = oods["feats"].tolist()
     
     if (path1 != f'/home/radhika/mos1/checkpoints/pca_plots_density_{args.density_type}_separate/imagenet.png'):
         
-        if(args.separate == False):
+        if(args.separate == "False"):
             name1 =  "ID data"
-            ax.scatter(x, y, c=z, s=0.03, marker = "o", label = name1)
-        
+            # ax.scatter(x, y, c=z, s=0.04, marker = "o", label = name1, cmap="Reds")
+            ax.scatter(x, y, c=z, s=0.05, marker = "o", cmap="Reds")
+            # plt.colorbar(fig, label='density') 
         PCs_2d = pd.DataFrame(pca_2d.transform(ood1))
         PCs_2d.columns = ["PC1_2d", "PC2_2d"]
         ood_df1 = pd.concat([oods, PCs_2d], axis=1, join='inner')
@@ -179,19 +180,33 @@ def visualization_density_gaussian_kde(args, train_Df, oods, path1):
         x, y, z = ood_df1["PC1_2d"][idx], ood_df1["PC2_2d"][idx], z[idx]
 
         name1 =  "OOD data"
-        ax.scatter(x, y, c=z, s=0.03, marker = "x", label = name1)
-        
+        # ax.scatter(x, y, c=z, s=0.04, marker = "o", label = name1, cmap="Blues")
+        if(args.separate == "True"):
+            fig = ax.scatter(x, y, c=z, s=0.07, marker = ".",cmap="Blues")
+            plt.colorbar(fig, label='density') 
+        else:
+            ax.scatter(x, y, c=z, s=0.07, marker = ".",cmap="Blues")
+            
         
     plt.xlabel("pc1")
     plt.ylabel("pc2")
-    plt.xlim(-300, 800)
-    plt.ylim(-300, 500)
+    plt.xlim(-300, 600)
+    plt.ylim(-300, 450)
     plt.grid()
     
-    lgnd = plt.legend(loc="upper right", scatterpoints=1, fontsize=10)
-    # lgnd.legendHandles[0]._sizes = [30]
-    # if (path1 != '/home/radhika/mos1/checkpoints/pca_plots_density_separate/imagenet.png'):
+    # lgnd = plt.legend(loc="upper right", scatterpoints=1, fontsize=10)
+    # if (args.separate == "False"):
+    #     lgnd.legendHandles[0]._sizes = [30]
+    #     lgnd.legendHandles[0].set_color("red")
     #     lgnd.legendHandles[1]._sizes = [30]
+    #     lgnd.legendHandles[1].set_color("blue")
+    # else:
+    #     if (path1 == f'/home/radhika/mos1/checkpoints/pca_plots_density_{args.density_type}_separate/imagenet.png'):
+    #         lgnd.legendHandles[0]._sizes = [30]
+    #         lgnd.legendHandles[0].set_color("red")
+    #     else:
+    #         lgnd.legendHandles[0]._sizes = [30]
+    #         lgnd.legendHandles[0].set_color("blue")
     plt.savefig(path1, bbox_inches='tight', dpi=300)
 
 
@@ -215,7 +230,7 @@ def visualization(train_Df, oods, path1):
     train_Df1["dummy"] = 0
 
     name1 =  "ID data"
-    ax.scatter(train_Df1["PC1_2d"], train_Df1["PC2_2d"], c = "blue", s = 0.03, label = name1, marker = "o")
+    ax.scatter(train_Df1["PC1_2d"], train_Df1["PC2_2d"], c = "blue", s = 0.03, label = name1, marker = "o", alpha=0.4)
 
     ood1 = oods["feats"].tolist()
     
@@ -225,7 +240,7 @@ def visualization(train_Df, oods, path1):
         ood_df1 = pd.concat([oods, PCs_2d], axis=1, join='inner')
         ood_df1["dummy"] = 0
         name1 =  "OOD"
-        ax.scatter(ood_df1["PC1_2d"], ood_df1["PC2_2d"], c = "magenta", s = 0.03, label = name1, marker = "o")
+        ax.scatter(ood_df1["PC1_2d"], ood_df1["PC2_2d"], c = "magenta", s = 0.03, label = name1, marker = "o", alpha=0.4)
         
     plt.xlabel("pc1")
     plt.ylabel("pc2")
@@ -254,8 +269,8 @@ def main(args):
     in_Df = pd.DataFrame(list(zip(in_feats)), columns=["feats"])
     ood_Df = pd.DataFrame(list(zip(ood_feats)), columns=["feats"])
 
-    if(args.density):
-        if(args.separate == True):
+    if(args.density == "True"):
+        if(args.separate == "True"):
             pca_plots_path = f'/home/radhika/mos1/checkpoints/pca_plots_density_{args.density_type}_separate'
         else:
             pca_plots_path = f'/home/radhika/mos1/checkpoints/pca_plots_density_{args.density_type}'
@@ -263,9 +278,9 @@ def main(args):
         pca_plots_path = f'/home/radhika/mos1/checkpoints/pca_plots'
     os.makedirs(pca_plots_path, exist_ok=True)
 
-    if(args.separate ==True):
+    if(args.separate == "True"):
         pca_plots_path_file = os.path.join(pca_plots_path, 'imagenet.png')
-        if(args.density):
+        if(args.density == "True"):
             if(args.density_type == "gaussian_kde"):
                 visualization_density_gaussian_kde(args, in_Df, ood_Df, pca_plots_path_file)
             if(args.density_type == "hexbin"):
@@ -276,8 +291,8 @@ def main(args):
             visualization(in_Df, ood_Df, pca_plots_path_file)
 
     pca_plots_path_file = os.path.join(pca_plots_path, f'{args.dataset_name}.png')
-    print(args.separate, pca_plots_path_file)
-    if(args.density):
+    print(args.separate, args.density, pca_plots_path_file)
+    if(args.density == "True"):
         if(args.density_type == "gaussian_kde"):
             visualization_density_gaussian_kde(args, in_Df, ood_Df, pca_plots_path_file)
         if(args.density_type == "hexbin"):

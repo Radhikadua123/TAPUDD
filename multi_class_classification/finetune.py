@@ -14,7 +14,6 @@ from dataset import DatasetWithMeta, DatasetWithMetaGroup
 
 from tensorboardX import SummaryWriter
 
-
 def topk(output, target, ks=(1,)):
     """Returns one boolean vector for each k, whether the target is within the output's top-k."""
     _, pred = output.topk(max(ks), 1, True, True)

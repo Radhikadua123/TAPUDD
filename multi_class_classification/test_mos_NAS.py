@@ -17,6 +17,12 @@ import numpy as np
 from utils.test_utils import arg_parser, mk_id_ood, get_measures, plot_aupr_auroc
 from finetune import get_group_slices
 
+def gaussian_noise(x, severity=1):
+    """Function to add gaussian noise in images with different level of severity"""
+    c = [0, .01, .02, .03, 0.04, .05, 0.06, .07, 0.08, 0.09, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1][severity - 1]
+
+    x = np.array(x) / 255.
+    return np.clip(x + np.random.normal(size=x.shape, scale=c), 0, 1) * 255
 
 
 class Imagenet_adjust_NAS(Dataset):
@@ -40,6 +46,9 @@ class Imagenet_adjust_NAS(Dataset):
             img = tv.transforms.functional.adjust_brightness(img_pil, brightness_factor = self.adjust_scale)
         elif self.adjust_type == 'contrast':
             img = tv.transforms.functional.adjust_contrast(img_pil, contrast_factor = self.adjust_scale)
+        elif self.adjust_type == 'gaussian_noise':
+            img = gaussian_noise(img_pil, int(self.adjust_scale))
+            img = Image.fromarray((img * 255).astype(np.uint8))
         else:
             print("unavailable adjust_type")
 
@@ -71,6 +80,7 @@ def mk_id_ood(args, logger, adjust_type, adjust_scale):
     else:
         nas_set = Imagenet_adjust_NAS(args.in_datadir, transform = val_tx, adjust_type = adjust_type, adjust_scale = float(adjust_scale))
         print("ood different from in set")
+    
     logger.info(f"Using an in-distribution set with {len(in_set)} images.")
     logger.info(f"Using an ood-distribution set with {len(nas_set)} images.")
 

@@ -28,6 +28,14 @@ torch.manual_seed(1)
 torch.cuda.manual_seed(1)
 np.random.seed(1)
 
+def gaussian_noise(x, severity=1):
+    """Function to add gaussian noise in images with different level of severity"""
+    c = [0, .01, .02, .03, 0.04, .05, 0.06, .07, 0.08, 0.09, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1][severity - 1]
+
+    x = np.array(x) / 255.
+    return np.clip(x + np.random.normal(size=x.shape, scale=c), 0, 1) * 255
+
+
 class Imagenet_adjust_NAS(Dataset):
     """Custom Dataset for loading RSNA Boneage dataset with distibution shift caused by the variation of brightness, contrast, shot noise,
        gaussian noise or impulse noise. Parameter "adjust_type" specifies the variation factor and parameter "adjust_scale" specifies the 
@@ -49,18 +57,21 @@ class Imagenet_adjust_NAS(Dataset):
             img = tv.transforms.functional.adjust_brightness(img_pil, brightness_factor = self.adjust_scale)
         elif self.adjust_type == 'contrast':
             img = tv.transforms.functional.adjust_contrast(img_pil, contrast_factor = self.adjust_scale)
+        elif self.adjust_type == 'gaussian_noise':
+            img = gaussian_noise(img_pil, self.adjust_scale)
+            img = Image.fromarray((img * 255).astype(np.uint8))
         else:
             print("unavailable adjust_type")
 
         img = self.transform(img)
         return img
-        
 
     def __len__(self):
         return len(self.img_names)
     
     def print_bok(self):
         print(self.img_names)
+
 
 def mk_id_ood(args, logger, adjust_type, adjust_scale):
     """Returns train and validation datasets."""
@@ -113,18 +124,16 @@ def extract_features(model, loader, save_path, adjust_scale):
     features = []
 
     for num_batch, (data) in enumerate(loader):
-        # print(data.shape)
         if num_batch % 100 == 0:
             print('{} batches processed...'.format(num_batch))
-        # total += data.size(0)
-        # data = data.cuda()
+    
         with torch.no_grad():
             data = Variable(data)
             data = data.cuda()
             out_features = [model(x=data, layer_index=4)]
 
         num_output = len(out_features)
-        # print(out_features[0].shape, num_output)
+
         # get hidden features
         for i in range(num_output):
             out_features[i] = out_features[i].view(out_features[i].size(0), out_features[i].size(1), -1)
@@ -153,9 +162,6 @@ def main(args):
     model = model.cuda()
 
     adjust_type = args.adjust_type
-    # dir_path = os.path.join("features", "imagenet", "train")
-    # os.makedirs(dir_path, exist_ok=True)
-    # extract_features(model, train_loader, dir_path)
 
     if adjust_type == 'bright':
         adjust_scale = [1.0]
@@ -167,15 +173,13 @@ def main(args):
         adjust_scale += list(np.arange(0,20,1)/10)
         adjust_scale += list(np.arange(20,80,5)/10)
 
+    elif adjust_type == "gaussian_noise":
+        adjust_scale = [1]
+        adjust_scale += list(range(1,21))
+
     for adjust_scale_curr in adjust_scale:
         print("####BRIGHTNESS ######", adjust_scale_curr)
         nas_set, nas_loader = mk_id_ood(args, logger, adjust_type, adjust_scale_curr)
-
-    # dir_path = os.path.join("features", "id_data")
-    # os.makedirs(dir_path, exist_ok=True)
-    # extract_features(model, in_loader, dir_path)
-    # print("id data done ###########")
-
         dir_path = os.path.join("features", "nas_data_imagenet", adjust_type)
         os.makedirs(dir_path, exist_ok=True)
         extract_features(model, nas_loader, dir_path, adjust_scale_curr)

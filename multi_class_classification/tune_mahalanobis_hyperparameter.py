@@ -249,9 +249,6 @@ def tune_mahalanobis_hyperparams(args, model, num_classes, train_loader, val_loa
         f1.close()
         f2.close()
 
-        # results = metric(save_dir, stypes)
-        # print_results(results, stypes)
-        # fpr = results['mahalanobis']['FPR']
         all_confidence_scores_in = np.array(all_confidence_scores_in).reshape(-1, 1)
         all_confidence_scores_out = np.array(all_confidence_scores_out).reshape(-1, 1)
         logger.info(all_confidence_scores_in.shape)

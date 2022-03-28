@@ -130,7 +130,7 @@ def get_measures(in_examples, out_examples):
     return auroc, aupr_in, aupr_out, fpr
 
 
-def plot_aupr_auroc(in_examples, out_examples, path):
+def plot_aupr_auroc(in_examples, out_examples, path): #### plot fpr tnr curve; prec recall curve; also get aupr, auroc using auc
     num_in = in_examples.shape[0]
     num_out = out_examples.shape[0]
 
@@ -141,19 +141,14 @@ def plot_aupr_auroc(in_examples, out_examples, path):
     labels[:num_in] += 1
 
     examples = np.squeeze(np.vstack((in_examples, out_examples)))
-    # aupr_in = sk.average_precision_score(labels, examples)
-    # auroc = sk.roc_auc_score(labels, examples)
 
     fpr, tpr, _ = sk.roc_curve(labels, examples)
     prec, recall, _ = sk.precision_recall_curve(labels, examples)
     thres = num_in/(num_in + num_out)
-    # recall_level = 0.95
-    # fpr = fpr_and_fdr_at_recall(labels, examples, recall_level)
 
     labels_rev = np.zeros(num_in + num_out, dtype=np.int32)
     labels_rev[num_in:] += 1
     examples = np.squeeze(-np.vstack((in_examples, out_examples)))
-    # aupr_out = sk.average_precision_score(labels_rev, examples)
 
     prec_out, recall_out, _ = sk.precision_recall_curve(labels_rev, examples)
     thres_out = num_out/(num_in + num_out)

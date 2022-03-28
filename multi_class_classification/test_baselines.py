@@ -5,7 +5,7 @@ import time
 
 import numpy as np
 
-from utils.test_utils import arg_parser, mk_id_ood, get_measures
+from utils.test_utils import arg_parser, mk_id_ood, get_measures, plot_aupr_auroc
 import os
 
 from sklearn.linear_model import LogisticRegressionCV
@@ -58,11 +58,7 @@ def iterate_data_odin(data_loader, model, epsilon, temper, logger):
         confs.extend(np.max(nnOutputs, axis=1))
         if b % 100 == 0:
             logger.info('{} batches processed'.format(b))
-
-        # debug
-        # if b > 500:
-        #    break
-
+            
     return np.array(confs)
 
 
@@ -211,13 +207,27 @@ def run_eval(model, in_loader, out_loader, logger, args, num_classes):
     in_examples = in_scores.reshape((-1, 1))
     out_examples = out_scores.reshape((-1, 1))
 
+    dir_path = os.path.join(args.logdir, args.name)
+    os.makedirs(dir_path, exist_ok=True)
+    file_path_ood_scores = os.path.join(args.logdir, args.name, "ood_scores.npy")
+    file_path_id_scores = os.path.join(args.logdir, args.name, "id_scores.npy")
+
+    np.save(file_path_id_scores, in_examples)
+    np.save(file_path_ood_scores, out_examples)
+
     auroc, aupr_in, aupr_out, fpr95 = get_measures(in_examples, out_examples)
+    path_auroc_aupr = os.path.join(args.logdir, args.name)
+    auc_roc, auc_aupr_in, auc_aupr_out = plot_aupr_auroc(in_examples, out_examples, path_auroc_aupr)
 
     logger.info('============Results for {}============'.format(args.score))
     logger.info('AUROC: {}'.format(auroc))
     logger.info('AUPR (In): {}'.format(aupr_in))
     logger.info('AUPR (Out): {}'.format(aupr_out))
     logger.info('FPR95: {}'.format(fpr95))
+    logger.info('Recalculating AUROC using sk.auc: {}'.format(auc_roc))
+    logger.info('Recalculating AUPR (In) using sk.auc: {}'.format(auc_aupr_in))
+    logger.info('Recalculating AUPR (Out) using sk.auc: {}'.format(auc_aupr_out))
+
 
     logger.flush()
 

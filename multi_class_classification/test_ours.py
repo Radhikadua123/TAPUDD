@@ -38,21 +38,16 @@ import time
     
 def mk_id_ood(ood_feats, in_feats):
     """Returns train and validation datasets."""
-    # print("len of ID and OOD", len(in_feats), len(ood_feats))
-    # l = min(len(in_feats), len(ood_feats))
-    # in_feats = in_feats[:l]
-    # ood_feats = ood_feats[:l]
     in_set = Dataset_ood_test(in_feats)
     ood_set = Dataset_ood_test(ood_feats)
-    # print("########", len(in_set), len(ood_set))
     print(f"Using an in-distribution set with {len(in_set)} images.")
     print(f"Using an out-of-distribution set with {len(ood_set)} images.")
 
     in_loader = torch.utils.data.DataLoader(
-        in_set, batch_size=64, shuffle=True,
+        in_set, batch_size=64, shuffle=False,
         num_workers=4, pin_memory=True, drop_last=False)
     out_loader = torch.utils.data.DataLoader(
-        ood_set, batch_size=64, shuffle=True,
+        ood_set, batch_size=64, shuffle=False,
         num_workers=4, pin_memory=True, drop_last=False)
     
     return in_loader, out_loader
@@ -95,7 +90,7 @@ class Dataset_ood_test(Dataset):
 
 
 
-def run_eval(logger, model, args, estimator, num_groups, clustering_type, covar_type, use_gmm_stats, train_loader, in_loader, out_loader, mean, var, device, metric = 'none'):
+def run_eval(logger, model, args, estimator, num_groups, clustering_type, covar_type, use_gmm_stats, in_loader, out_loader, mean, var, device, metric = 'none'):
     # switch to evaluate mode
     model.eval()
     logger.info("Running test...")
@@ -116,10 +111,8 @@ def run_eval(logger, model, args, estimator, num_groups, clustering_type, covar_
         feature_list = feature_list[0]
         
         if(clustering_type != "gaussian"):
-            mean, var = sample_estimator(model, num_classes=num_groups, feature_list= feature_list, train_loader = train_loader, device = device)
+            mean, var = sample_estimator(model, num_classes=num_groups, feature_list= feature_list, train_loader = in_loader, device = device) ###not used ..
         
-    # log_pth = os.path.join(dir_path, "logs_{}_cluster_mahala".format(clustering_type))
-    # os.makedirs(log_pth, exist_ok=True)
     model.eval()
     out_score =[]
     in_score = []
@@ -133,6 +126,13 @@ def run_eval(logger, model, args, estimator, num_groups, clustering_type, covar_
         in_score.extend(in_confs)
     in_examples = np.array(in_score).reshape((-1, 1))
     out_examples = np.array(out_score).reshape((-1, 1))
+    dir_path = os.path.join(args.logdir, args.name)
+    os.makedirs(dir_path, exist_ok=True)
+    file_path_ood_scores = os.path.join(args.logdir, args.name, "ood_scores.npy")
+    np.save(file_path_ood_scores, out_examples)
+
+    file_path_id_scores = os.path.join(args.logdir, args.name, "id_scores.npy")
+    np.save(file_path_id_scores, in_examples)
 
     auroc, aupr_in, aupr_out, fpr95 = get_measures(in_examples, out_examples)
     os.makedirs(os.path.join(args.logdir, args.name), exist_ok=True)
@@ -156,24 +156,6 @@ def unsupervised_ood_detection(model, logger, args, num_of_clusters, clustering_
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
     
-    train_set, val_set, train_loader, val_loader = mktrainval(args, logger)
-    
-    train_feats_df = []
-
-    dir_path = os.path.join("features", "feats")
-    # train_feats_df.extend(np.load("features/id_data/feats.npy"))
-    # train_feats_df.extend(np.load("features/imagenet/train/feats.npy"))
-    np.random.seed(1)
-    train_feats1 = np.load("features/imagenet/train/feats.npy")
-    print(train_feats1.shape)
-    train_feats = train_feats1[np.random.choice(train_feats1.shape[0], args.num_of_samples, replace=False)]
-    print(train_feats.shape)
-    train_feats_df.extend(train_feats)
-
-    train_Df = pd.DataFrame(list(zip(train_feats_df)), columns=["feats"])
-    
-    print(len(train_Df))
-    
     # Apply clustering
     if(clustering_type == "kmeans"):
         estimator = KMeans(n_clusters = num_of_clusters)
@@ -189,6 +171,21 @@ def unsupervised_ood_detection(model, logger, args, num_of_clusters, clustering_
         print("Loading weights from saved clustering estimator")
         
     else:
+        train_set, val_set, train_loader, val_loader = mktrainval(args, logger)
+    
+        train_feats_df = []
+
+        dir_path = os.path.join("features", "feats")
+        np.random.seed(1)
+        train_feats1 = np.load("features/imagenet/train/feats.npy")
+        print(train_feats1.shape)
+        train_feats = train_feats1[np.random.choice(train_feats1.shape[0], args.num_of_samples, replace=False)]
+        print(train_feats.shape)
+        train_feats_df.extend(train_feats)
+
+        train_Df = pd.DataFrame(list(zip(train_feats_df)), columns=["feats"])
+        
+        print(len(train_Df))
         estimator.fit(train_feats_df)
         pickle.dump(estimator, open(clustering_model_path_file, 'wb'))
         clusters = estimator.predict(train_feats_df)
@@ -230,18 +227,20 @@ def unsupervised_ood_detection(model, logger, args, num_of_clusters, clustering_
     in_feats = []
 
     in_feats.extend(np.load("features/id_data/feats.npy"))
-    if(ood_path == "/home/radhika/assign/MOS/features/nas_data_imagenet/bright/feats_adjust_scale_1.0.npy"):
+    if(ood_path == "features/nas_data_imagenet/bright/feats_adjust_scale_1.0.npy" or ood_path == "features/nas_data_imagenet/gaussian_noise/feats_adjust_scale_1.npy"):
         ood_path = "features/id_data/feats.npy"
+        print("OOD same as ID")
     ood_feats.extend(np.load(ood_path))
     in_loader, out_loader = mk_id_ood(ood_feats, in_feats)
 
     ood_set = Dataset_ood_test(ood_feats)
     out_loader = torch.utils.data.DataLoader(
-        ood_set, batch_size=64, shuffle=True,
+        ood_set, batch_size=64, shuffle=False,
         num_workers=4, pin_memory=True, drop_last=False)
+
     num_groups = num_of_clusters
     print("############# NUMBER OF CLUSTERS ############", num_of_clusters)
-    run_eval(logger, model, args, estimator, num_groups, clustering_type, covar_type, use_gmm_stats, train_loader, in_loader, out_loader, mean, var, device, metric)
+    run_eval(logger, model, args, estimator, num_groups, clustering_type, covar_type, use_gmm_stats, in_loader, out_loader, mean, var, device, metric)
 
    
 

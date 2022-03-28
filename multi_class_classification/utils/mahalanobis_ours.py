@@ -12,31 +12,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
 
-# features = None
-
-# def get_features_hook(self, input, output):
-#     global features
-#     features = [output]
-
-
-# def get_feature_list(model, device):
-#     global features
-#     temp_x = torch.rand(2,3,500,500).to(device)
-#     temp_x = Variable(temp_x)
-#     handle = model.fc[1].register_forward_hook(get_features_hook)
-#     model(temp_x)
-#     handle.remove()
-#     temp_list = features
-#     # print(model)
-#     num_output = len(temp_list)
-#     feature_list = np.empty(num_output)
-#     count = 0
-#     for out in temp_list:
-#         feature_list[count] = out.size(1)
-#         count += 1
-#         print(out.size(1))
-#     return feature_list
-
 def sample_estimator(model, num_classes, feature_list, train_loader, device):
     """
     compute sample mean and precision (inverse of covariance)
@@ -52,26 +27,8 @@ def sample_estimator(model, num_classes, feature_list, train_loader, device):
     list_features = np.zeros((num_output, num_classes)).tolist()
 
     for data, target in train_loader:
-        # target = target.to(device)
-        # target = target.squeeze()
         data = data.to(device)
-        # data = Variable(data, requires_grad=False)
-        # # output, out_features = model.feature_list(data)
-        # handle = model.fc[1].register_forward_hook(get_features_hook)
-        # output = model(data)
-        # handle.remove()
-        # global features
-        # out_features = features
         out_features = [data]
-        # get hidden features
-        # for i in range(num_output):
-        #     out_features[i] = out_features[i].view(out_features[i].size(0), out_features[i].size(1), -1)
-        #     out_features[i] = torch.mean(out_features[i].data, 2)
-            
-        # compute the accuracy
-        # _, predicted = torch.max(output.data, 1)
-        # total += target.size(0)
-        # correct += (predicted == target).sum().item()
         
         # construct the sample matrix
         for i in range(target.size(0)):
@@ -123,15 +80,8 @@ def get_Mahalanobis_score(model, data, num_classes, sample_mean, precision, cova
     return: Mahalanobis score from layer_index
     '''
     model.eval()
-    
-    # handle = model.fc[1].register_forward_hook(get_features_hook)
-    # model(data)
-    # handle.remove()
-    # global features
     out_features = data
     
-    # out_features = out_features.view(out_features.size(0), out_features.size(1), -1)
-    # out_features = torch.mean(out_features, 2)
     # compute Mahalanobis score
     gaussian_score = 0
     for i in range(num_classes):

@@ -49,21 +49,21 @@ def mktrainval(args, logger):
 
     return train_set, valid_set, train_loader, valid_loader
 
+
 def extract_features(model, loader, save_path):
     features = []
 
     for num_batch, (data, target) in enumerate(loader):
         if num_batch % 100 == 0:
             print('{} batches processed...'.format(num_batch))
-        # total += data.size(0)
-        # data = data.cuda()
+
         with torch.no_grad():
             data = Variable(data)
             data = data.cuda()
             out_features = [model(x=data, layer_index=4)]
 
         num_output = len(out_features)
-        # print(out_features[0].shape, num_output)
+
         # get hidden features
         for i in range(num_output):
             out_features[i] = out_features[i].view(out_features[i].size(0), out_features[i].size(1), -1)
@@ -90,35 +90,6 @@ def main(args):
     logger.info("Moving model onto all GPUs")
     model = torch.nn.DataParallel(model)
     model = model.cuda()
-
-    # features = []
-
-    # for num_batch, (data, target) in enumerate(train_loader):
-    #     if num_batch % 100 == 0:
-    #         print('{} batches processed...'.format(num_batch))
-    #     # total += data.size(0)
-    #     # data = data.cuda()
-    #     with torch.no_grad():
-    #         data = Variable(data)
-    #         data = data.cuda()
-    #         out_features = [model(x=data, layer_index=4)]
-
-    #     num_output = len(out_features)
-    #     print(out_features[0].shape, num_output)
-    #     # get hidden features
-    #     for i in range(num_output):
-    #         out_features[i] = out_features[i].view(out_features[i].size(0), out_features[i].size(1), -1)
-    #         out_features[i] = torch.mean(out_features[i].data, 2).data.cpu()
-    #     features.append(out_features)
-    
-    # features_all = torch.cat(features)
-
-    # logger.info('saving features...')
-    # dir_path = os.path.join("features", "imagenet", "train")
-    # os.makedirs(dir_path, exist_ok=True)
-
-    # np.save(os.path.join(dir_path, 'feats.npy'), features_all.detach().cpu().numpy())
-
     dir_path = os.path.join("features", "imagenet", "train")
     os.makedirs(dir_path, exist_ok=True)
     extract_features(model, train_loader, dir_path)

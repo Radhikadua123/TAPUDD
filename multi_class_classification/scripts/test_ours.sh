@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 METHOD=GMM_FULL_Mahala
-OUT_DATA_SET=$1
 MODEL=BiT-S-R101x1
 num_of_clusters_=32
 num_samples_for_fitting_model=1281167
@@ -12,7 +11,7 @@ for ((num_samples=1281167; num_samples<=num_samples_for_fitting_model; num_sampl
             CUDA_VISIBLE_DEVICES=2,3 python test_ours.py \
             --name test_${MODEL}_${METHOD}_${OUT_DATA}/num_samples${num_samples}/cluster${clusters} \
             --in_datadir /home/data_storage/imagenet/v12/val \
-            --out_datadir /home/data_storage/radhika/data/ood_data/${OUT_DATA} \
+            --out_datadir /home/data_storage/ood_datasets/data/ood_data/${OUT_DATA} \
             --datadir /home/data_storage/imagenet/v12 \
             --train_list data_lists/imagenet2012_train_list.txt \
             --val_list data_lists/imagenet2012_val_list.txt \

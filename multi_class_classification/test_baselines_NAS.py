@@ -17,6 +17,12 @@ from sklearn.linear_model import LogisticRegressionCV
 from torch.autograd import Variable
 from utils.mahalanobis_lib import get_Mahalanobis_score
 
+def gaussian_noise(x, severity=1):
+    """Function to add gaussian noise in images with different level of severity"""
+    c = [0, .01, .02, .03, 0.04, .05, 0.06, .07, 0.08, 0.09, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1][severity - 1]
+    x = np.array(x) / 255.
+    return np.clip(x + np.random.normal(size=x.shape, scale=c), 0, 1) * 255
+
 
 class Imagenet_adjust_NAS(Dataset):
     """Custom Dataset for loading RSNA Boneage dataset with distibution shift caused by the variation of brightness, contrast, shot noise,
@@ -39,18 +45,20 @@ class Imagenet_adjust_NAS(Dataset):
             img = tv.transforms.functional.adjust_brightness(img_pil, brightness_factor = self.adjust_scale)
         elif self.adjust_type == 'contrast':
             img = tv.transforms.functional.adjust_contrast(img_pil, contrast_factor = self.adjust_scale)
+        elif self.adjust_type == 'gaussian_noise':
+            img = gaussian_noise(img_pil, int(self.adjust_scale))
+            img = Image.fromarray((img * 255).astype(np.uint8))
         else:
             print("unavailable adjust_type")
-
         img = self.transform(img)
         return img, img
-        
 
     def __len__(self):
         return len(self.img_names)
     
     def print_bok(self):
         print(self.img_names)
+
 
 def mk_id_ood(args, logger, adjust_type, adjust_scale):
     """Returns train and validation datasets."""
@@ -75,7 +83,6 @@ def mk_id_ood(args, logger, adjust_type, adjust_scale):
     in_loader = torch.utils.data.DataLoader(
         in_set, batch_size=args.batch, shuffle=False,
         num_workers=args.workers, pin_memory=True, drop_last=False)
-
 
     nas_loader = torch.utils.data.DataLoader(
         nas_set, batch_size=args.batch, shuffle=False,
@@ -129,10 +136,6 @@ def iterate_data_odin(data_loader, model, epsilon, temper, logger):
         confs.extend(np.max(nnOutputs, axis=1))
         if b % 100 == 0:
             logger.info('{} batches processed'.format(b))
-
-        # debug
-        # if b > 500:
-        #    break
 
     return np.array(confs)
 

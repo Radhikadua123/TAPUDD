@@ -6,8 +6,8 @@ MODEL=BiT-S-R101x1
 num_of_clusters_=10
 num_samples_for_fitting_model=1281167
 
-for OUT_DATA in iNaturalist; do
-    for density_type in gaussian_kde; do
+for OUT_DATA in dtd ; do
+    for density_type in "gaussian_kde"; do
         CUDA_VISIBLE_DEVICES=2,3 python pca_visualization.py \
         --name test_${MODEL}_${METHOD}_${OUT_DATA} \
         --in_datadir /home/data_storage/imagenet/v12/val \
