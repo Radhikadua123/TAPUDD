@@ -23,10 +23,11 @@ $ conda env create -f environment.yml
 ```
 
 ## Catalog
-- Code for experiments on Synthetic datasets
-- Code for Binary classification task
-- Code for Multi-class classification task
-- Code for Regression task
+Code for experiments on:
+- Synthetic datasets
+- Binary classification task
+- Multi-class classification task
+- Regression task
 
 ## Contributing
 We'd love to accept your contributions to this project. Please feel free to open an issue, or submit a pull request as necessary. If you have implementations of this repository in other ML frameworks, please reach out so we may highlight them here.
