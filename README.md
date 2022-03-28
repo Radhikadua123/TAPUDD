@@ -16,6 +16,10 @@ __Contribution of this work__
 - For the first time, we empirically show that a single approach can be used for multiple tasks with stable performance. We conduct exhaustive experiments on synthetic and real-world datasets for regression, binary classification, and multi-class classification tasks to demonstrate the effectiveness of our method.
 - We also conduct ablation studies to illustrate the effect of using a different number of clusters in *TAP-Mahalanobis* and different ensembling strategies in TAPUDD. We observe that TAPUDD with different ensembling strategies performs better or on-par with *TAP-Mahalanobis*.
 
+## Method
+We propose a novel, **T**ask **A**gnostic and **P**ost-hoc **U**nseen **D**istribution **D**etection (TAPUDD) method, as shown in figure below. The method comprises of two main modules TAP-Mahalanobis and Ensembling.
+
+![method](fig/method.png)
 
 ## Prerequisites
 ```
