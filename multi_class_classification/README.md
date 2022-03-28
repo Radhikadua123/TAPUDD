@@ -45,4 +45,4 @@ bash ./scripts/tune_mahalanobis.sh
 
 MOS achieves state-of-the-art performance averaged on the 4 OOD datasets.
 
-![results](figs/multi_class.png)
+![results](fig/multi-class-results.png)
