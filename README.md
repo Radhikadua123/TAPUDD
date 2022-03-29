@@ -26,12 +26,15 @@ We propose a novel, **T**ask **A**gnostic and **P**ost-hoc **U**nseen **D**istri
 $ conda env create -f environment.yml
 ```
 
-## Catalog
-Code for experiments on:
-- Synthetic datasets
-- Binary classification task
-- Multi-class classification task
-- Regression task
+## Experiments and Results
+Code for the experiments on synthetic datasets, binary classification, multi-class classification, and regression are inside the respective folders:
+
+- [Synthetic datasets](https://github.com/Radhikadua123/TAG/tree/main/synthetic_2d_binary_classification)
+- [Binary classification task](https://github.com/Radhikadua123/TAG/tree/main/binary_classification)
+- [Multi-class classification task](https://github.com/Radhikadua123/TAG/tree/main/multi_class_classification)
+- [Regression task]()
+
+Each of these are independent repositories. Please consider them separate. 
 
 ## Contributing
 We'd love to accept your contributions to this project. Please feel free to open an issue, or submit a pull request as necessary. If you have implementations of this repository in other ML frameworks, please reach out so we may highlight them here.
