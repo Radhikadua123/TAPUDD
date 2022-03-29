@@ -1,19 +1,13 @@
-# Experiments on Multi-class classification
+# Experiments on Binary classification
 
-We use the datasets and code from [this](https://github.com/deeplearning-wisc/large_scale_ood) repository for training the model for classification task and for the baseline OOD detection methods. Please refer to the aforementioned repository for information on dataset and pretrained model preparation.
+Please download the [dataset] (https://www.kaggle.com/datasets/kmader/rsna-bone-age) in "dataset" directoy.
 
-## Group-softmax/Flat-softmax Model Finetuning
+## Training
 
-For flat-softmax finetuning (TAPUDD, TAP-Mahalanobis and baselines), please run:
-
-```
-bash ./scripts/finetune_flat_softmax.sh
-```
-
-For group-softmax finetuning (MOS), please run:
+To train the gender classification model, please run:
 
 ```
-bash ./scripts/finetune_group_softmax.sh
+bash ./scripts/train.sh
 ```
 
 
@@ -21,7 +15,7 @@ bash ./scripts/finetune_group_softmax.sh
 
 To reproduce our TAP-Mahalanobis and TAP-Ensemble results, please run the following commands for feature extraction followed by :
 ```
-bash ./scripts/get_features.sh iNaturalist(/SUN/Places/Textures)
+bash ./scripts/get_features.sh
 bash ./scripts/test_ours.sh 
 bash ./scripts/test_ours_ensemble.sh 
 ```
