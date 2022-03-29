@@ -1,6 +1,6 @@
 # Experiments on Binary classification
 
-Please download the [dataset] (https://www.kaggle.com/datasets/kmader/rsna-bone-age) in "dataset" directoy.
+Please download the [dataset](https://www.kaggle.com/datasets/kmader/rsna-bone-age) in "dataset" directoy.
 
 ## Training
 
