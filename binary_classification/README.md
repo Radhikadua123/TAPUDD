@@ -40,4 +40,4 @@ bash ./scripts/tune_mahalanobis.sh
 ### Results
 NAS detection performance in binary classification task (gender prediction)for NAS shift of brightness in RSNA boneage dataset measured by AUROC. Highlighted row presents the performance on in-distribution dataset. MB and TAP-MB refers to Mahalanobis and TAP-Mahalanobis, respectively. Our proposed approaches, TAPUDD and TAP-Mahalanobis are more sensitive to NAS samples compared to competitive baselines.
 
-![results](images/binary-class-results.png)
+![results](images/binary_class_results.png)
