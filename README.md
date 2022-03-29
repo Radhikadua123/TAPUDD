@@ -37,4 +37,4 @@ Code for the experiments on synthetic datasets, binary classification, multi-cla
 Each of these are independent repositories. Please consider them separate. 
 
 ## Contributing
-We'd love to accept your contributions to this project. Please feel free to open an issue, or submit a pull request as necessary. If you have implementations of this repository in other ML frameworks, please reach out so we may highlight them here.
+We'd love to accept your contributions to this project. Please feel free to open an issue, or submit a pull request as necessary. 
