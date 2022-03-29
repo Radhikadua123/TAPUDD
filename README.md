@@ -19,7 +19,7 @@ __Contribution of this work__
 ## Method
 We propose a novel, **T**ask **A**gnostic and **P**ost-hoc **U**nseen **D**istribution **D**etection (TAPUDD) method, as shown in figure below. The method comprises of two main modules TAP-Mahalanobis and Ensembling.
 
-![method](fig/method.png)
+![method](images/method.png)
 
 ## Prerequisites
 ```
