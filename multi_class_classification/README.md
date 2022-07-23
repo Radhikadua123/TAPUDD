@@ -57,7 +57,7 @@ Note: before testing Mahalanobis, make sure you have tuned and saved its hyperpa
 bash ./scripts/tune_mahalanobis.sh
 ```
 
-### OOD Detection Results
+## OOD Detection Results
 
 ### Results
 OOD detection performance comparison between TAPUDD method and baselines. Our method detects samples from Textures more OOD compared to samples from iNaturalist, SUN, Places (similar to the way humans perceive).
