@@ -1,23 +1,39 @@
 # Experiments on Multi-class classification
 
-We use the datasets and code from [this](https://github.com/deeplearning-wisc/large_scale_ood) repository for training the model for classification task and for the baseline OOD detection methods. Please refer to the aforementioned repository for information on dataset and pretrained model preparation.
+We use the datasets and code from [this](https://github.com/deeplearning-wisc/large_scale_ood) repository for training the model for classification task and for the baseline OOD detection methods. Please refer to the aforementioned repository for detailed information on dataset and pretrained model preparation.
 
-## Group-softmax/Flat-softmax Model Finetuning
+## Usage
 
-For flat-softmax finetuning (TAPUDD, TAP-Mahalanobis and baselines), please run:
+### 1. Dataset Preparation
+
+#### In-distribution (ID) dataset
+Please download [ImageNet-1k](http://www.image-net.org/challenges/LSVRC/2012/index) and place the training data and validation data in some directory. We stored the train data in `/home/data_storage/imagenet/v12/train` and val data in `/home/data_storage/imagenet/v12/val`
+
+#### Out-of-distribution (OOD) dataset
+Please download the OOD datasets following the instructions given in [this](https://github.com/deeplearning-wisc/large_scale_ood) repository and put it into some directory. We stored the OOD datasets in `/home/data_storage/ood_datasets/data/ood_data/`.
+
+### 2. Pre-trained Model Preparation
+
+Please download the [BiT-S pre-trained model families](https://github.com/google-research/big_transfer)
+and put them into the folder `./bit_pretrained_models`.
+
+
+### 2. Group-softmax/Flat-softmax Model Finetuning
+
+For flat-softmax finetuning (used for TAPUDD, TAP-Mahalanobis and baselines), please modify `/home/data_storage/imagenet/v12` with ID dataset path and run:
 
 ```
-bash ./scripts/finetune_flat_softmax.sh
+bash ./scripts/finetune_flat_softmax.sh /home/data_storage/imagenet/v12
 ```
 
-For group-softmax finetuning (MOS), please run:
+For group-softmax finetuning (MOS), please  modify `/home/data_storage/imagenet/v12` with ID dataset path and run:
 
 ```
-bash ./scripts/finetune_group_softmax.sh
+bash ./scripts/finetune_group_softmax.sh /home/data_storage/imagenet/v12
 ```
 
 
-## OOD Detection Evaluation
+### 3. OOD Detection Evaluation
 
 To reproduce our TAP-Mahalanobis and TAP-Ensemble results, please run the following commands for feature extraction followed by :
 ```
@@ -41,7 +57,7 @@ Note: before testing Mahalanobis, make sure you have tuned and saved its hyperpa
 bash ./scripts/tune_mahalanobis.sh
 ```
 
-## OOD Detection Results
+### OOD Detection Results
 
 ### Results
 OOD detection performance comparison between TAPUDD method and baselines. Our method detects samples from Textures more OOD compared to samples from iNaturalist, SUN, Places (similar to the way humans perceive).
