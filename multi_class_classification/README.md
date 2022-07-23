@@ -18,7 +18,7 @@ Please download the [BiT-S pre-trained model families](https://github.com/google
 and put them into the folder `./bit_pretrained_models`.
 
 
-### 2. Group-softmax/Flat-softmax Model Finetuning
+### 3. Group-softmax/Flat-softmax Model Finetuning
 
 For flat-softmax finetuning (used for TAPUDD, TAP-Mahalanobis and baselines), please modify `/home/data_storage/imagenet/v12` with ID dataset path and run:
 
