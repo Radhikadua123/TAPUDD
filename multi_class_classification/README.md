@@ -26,7 +26,7 @@ For flat-softmax finetuning (used for TAPUDD, TAP-Mahalanobis and baselines), pl
 bash ./scripts/finetune_flat_softmax.sh /home/data_storage/imagenet/v12
 ```
 
-For group-softmax finetuning (MOS), please  modify `/home/data_storage/imagenet/v12` with ID dataset path and run:
+For group-softmax finetuning (MOS), please modify `/home/data_storage/imagenet/v12` with ID dataset path and run:
 
 ```
 bash ./scripts/finetune_group_softmax.sh /home/data_storage/imagenet/v12
@@ -35,9 +35,9 @@ bash ./scripts/finetune_group_softmax.sh /home/data_storage/imagenet/v12
 
 ### 3. OOD Detection Evaluation
 
-To reproduce our TAP-Mahalanobis and TAP-Ensemble results, please run the following commands for feature extraction followed by OOD Detection :
+To reproduce our TAP-Mahalanobis and TAP-Ensemble results, please run the following commands for feature extraction followed by OOD Detection. Please modify `/home/data_storage/imagenet/v12` with ID dataset path and `/home/data_storage/radhika/data/ood_data` with OOD dataset path.
 ```
-bash ./scripts/get_features.sh iNaturalist(/SUN/Places/Textures)
+bash ./scripts/get_features.sh iNaturalist(/SUN/Places/Textures) /home/data_storage/imagenet/v12 /home/data_storage/radhika/data/ood_data
 bash ./scripts/test_ours.sh 
 bash ./scripts/test_ours_ensemble.sh 
 ```
