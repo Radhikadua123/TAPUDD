@@ -54,7 +54,7 @@ bash ./scripts/test_mos.sh
 
 Note: before testing Mahalanobis, make sure you have tuned and saved its hyperparameters first by running:
 ```
-bash ./scripts/tune_mahalanobis.sh
+bash ./scripts/tune_mahalanobis.sh /home/data_storage/imagenet/v12
 ```
 
 ## OOD Detection Results
