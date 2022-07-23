@@ -35,7 +35,7 @@ bash ./scripts/finetune_group_softmax.sh /home/data_storage/imagenet/v12
 
 ### 3. OOD Detection Evaluation
 
-To reproduce our TAP-Mahalanobis and TAP-Ensemble results, please run the following commands for feature extraction followed by :
+To reproduce our TAP-Mahalanobis and TAP-Ensemble results, please run the following commands for feature extraction followed by OOD Detection :
 ```
 bash ./scripts/get_features.sh iNaturalist(/SUN/Places/Textures)
 bash ./scripts/test_ours.sh 
