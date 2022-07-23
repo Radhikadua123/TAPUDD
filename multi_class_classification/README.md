@@ -47,9 +47,9 @@ To reproduce baseline approaches (MSP, ODIN, Energy, Mahalanobis, KL_Div), pleas
 bash ./scripts/test_baselines.sh MSP(/ODIN/Energy/Mahalanobis/KL_Div) /home/data_storage/imagenet/v12 /home/data_storage/radhika/data/ood_data
 ```
 
-To reproduce MOS, please run:
+To reproduce MOS, please modify `/home/data_storage/imagenet/v12` with ID dataset path and `/home/data_storage/radhika/data/ood_data` with OOD dataset path and run:
 ```
-bash ./scripts/test_mos.sh
+bash ./scripts/test_mos.sh /home/data_storage/imagenet/v12 /home/data_storage/radhika/data/ood_data
 ```
 
 Note: before testing Mahalanobis, make sure you have tuned and saved its hyperparameters first by running:
