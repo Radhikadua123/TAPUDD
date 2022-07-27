@@ -35,19 +35,19 @@ bash ./scripts/finetune_group_softmax.sh /home/data_storage/imagenet/v12
 
 ### 4. OOD Detection Evaluation
 
-To reproduce our TAP-Mahalanobis and TAP-Ensemble results, please run the following commands for feature extraction followed by OOD Detection. Please modify `/home/data_storage/imagenet/v12` with ID dataset path and `/home/data_storage/ood_datasets/data/ood_data` with OOD dataset path.
+To **reproduce TAP-Mahalanobis and TAP-Ensemble** results, please run the following commands for feature extraction followed by OOD Detection. Please modify `/home/data_storage/imagenet/v12` with ID dataset path and `/home/data_storage/ood_datasets/data/ood_data` with OOD dataset path.
 ```
 bash ./scripts/get_features.sh iNaturalist(/SUN/Places/Textures) /home/data_storage/imagenet/v12 /home/data_storage/ood_datasets/data/ood_data
 bash ./scripts/test_ours.sh /home/data_storage/imagenet/v12 /home/data_storage/ood_datasets/data/ood_data
 bash ./scripts/test_ours_ensemble.sh 
 ```
 
-To reproduce baseline approaches (MSP, ODIN, Energy, Mahalanobis, KL_Div), please modify `/home/data_storage/imagenet/v12` with ID dataset path and `/home/data_storage/ood_datasets/data/ood_data` with OOD dataset path and run:
+To **reproduce baseline approaches** (MSP, ODIN, Energy, Mahalanobis, KL_Div), please modify `/home/data_storage/imagenet/v12` with ID dataset path and `/home/data_storage/ood_datasets/data/ood_data` with OOD dataset path and run:
 ```
 bash ./scripts/test_baselines.sh MSP(/ODIN/Energy/Mahalanobis/KL_Div) /home/data_storage/imagenet/v12 /home/data_storage/ood_datasets/data/ood_data
 ```
 
-To reproduce MOS, please modify `/home/data_storage/imagenet/v12` with ID dataset path and `/home/data_storage/ood_datasets/data/ood_data` with OOD dataset path and run:
+To **reproduce MOS**, please modify `/home/data_storage/imagenet/v12` with ID dataset path and `/home/data_storage/ood_datasets/data/ood_data` with OOD dataset path and run:
 ```
 bash ./scripts/test_mos.sh /home/data_storage/imagenet/v12 /home/data_storage/ood_datasets/data/ood_data
 ```
