@@ -42,14 +42,21 @@ class ToTensor(object):
     
     def __call__(self, sample, size = 500):
         image, gender, label = sample['image'], sample['gender'], sample['label']
-        image = cv2.resize(image,(size,size))
+
+        # image = cv2.resize(image,(size,size))
+        image = Image.fromarray(image)
+        image = np.array(image.resize((size, size)))
+        image = image.astype(np.float64)
+
         image = np.expand_dims(image,axis = 0)
         image = torch.from_numpy(image)
         image = image.repeat(3, 1, 1)
+    
         """ we need to convert  cuda.longtensors to cuda.floatTensor data type"""
         return {'image': image.float(),
                 'gender': torch.from_numpy(gender).long(),
-                'label':torch.from_numpy(label).float()}        
+                'label':torch.from_numpy(label).float()}   
+           
 
 
 class Normalize(object):
@@ -74,21 +81,15 @@ class Normalize(object):
 class BoneDataset(Dataset):
     """Custom Dataset for loading RSNA Boneage dataset."""
 
-    def __init__(self, dataframe, img_dir, mode ='train', transform=None, age = [10,11,12]):
+    def __init__(self, dataframe, img_dir, mode ='train', transform=None):
     
         df = dataframe
         df['path'] = df['id'].map(lambda x: os.path.join(img_dir,
                                                         '{}.png'.format(x)))
         df['gender'] = df['male'].map(lambda x: 1 if x else 0)
         self.img_dir = img_dir
-        if(mode == 'train'):
-            """Using 1500 images males and females during training. Total training images = 1500 Males + 1500 Females."""
-            l = 1500
-        else:
-            """Using 200 images males and females during validation and testing. Total validation/test images = 200 Males + 200 Females."""
-            l = 200
 
-        # Use this to train model. Removing skewing of dataset by considering equal no of males and females.
+        # Removing skewing of dataset by considering equal no of males and females.
         df1 = df.groupby(['gender']).get_group(0)
         df2 = df.groupby(['gender']).get_group(1)
         print("males and females", len(df1), len(df2))
@@ -110,7 +111,10 @@ class BoneDataset(Dataset):
 
     def __getitem__(self, index):
         img = self.img_dir + str(self.img_names[index]) + '.png'
-        img = cv2.imread(img,0)
+
+        # img = cv2.imread(img, 0)
+        img = np.array(Image.open(img))
+
         img = img.astype(np.float64)
         label = np.atleast_1d(self.y.values[index].astype('float'))
         gender = np.atleast_1d(self.gender.values[index].astype('float'))
@@ -119,6 +123,9 @@ class BoneDataset(Dataset):
         if self.transform:
             sample = self.transform(sample)
             image, gender, age = sample['image'], sample['gender'], sample['label']
+        # image = torch.zeros((3,500,500)).float()
+        # gender = torch.zeros(1).long()
+        # print(image.shape, gender.shape)
         return image, gender
 
     def __len__(self):
@@ -132,18 +139,19 @@ class BoneDataset_adjust(Dataset):
     """Custom Dataset for loading RSNA Boneage dataset with distibution shift caused by the variation of brightness, contrast, shot noise,
        gaussian noise or impulse noise. Parameter "adjust_type" specifies the variation factor and parameter "adjust_scale" specifies the 
        severity with which the image should be shifted. """
-    def __init__(self, dataframe, img_dir, transform=None, age = [10,11,12], adjust_type = 'bright', adjust_scale = 1):
+    def __init__(self, dataframe, img_dir, transform=None, adjust_type = 'bright', adjust_scale = 1):
     
         df = dataframe
         df['path'] = df['id'].map(lambda x: os.path.join(img_dir,
                                                         '{}.png'.format(x))) 
         df['gender'] = df['male'].map(lambda x: 1 if x else 0)
         self.img_dir = img_dir
-        """Using 200 images males and females in OOD data. Total images = 200 Males + 200 Females."""
+
+        """Removing skewing of dataset by considering equal no of males and females."""
         df1 = df.groupby(['gender']).get_group(0)
         df2 = df.groupby(['gender']).get_group(1)
         print("males and females", len(df1), len(df2))
-        minimum_samples =  min(len(df1), len(df2)) #### number of samples from each group to remove skewedness
+        minimum_samples =  min(len(df1), len(df2))
 
         df1 = df.groupby(['gender']).get_group(0)[:minimum_samples]
         df2 = df.groupby(['gender']).get_group(1)[:minimum_samples]
@@ -162,7 +170,10 @@ class BoneDataset_adjust(Dataset):
 
     def __getitem__(self, index):
         img = self.img_dir + str(self.img_names[index]) + '.png'
-        img = cv2.imread(img,0)
+        
+        # img = cv2.imread(img, 0)
+        img = np.array(Image.open(img))
+        
         # img = img.astype(np.float64)
         label = np.atleast_1d(self.y.values[index].astype('float'))
         gender = np.atleast_1d(self.gender.values[index].astype('float'))
@@ -219,14 +230,13 @@ def get_adjust_dataloaders(bones_df, train_df, val_df, test_df, img_dir, data_tr
 
     loaders = []
     data_len = []
-    ind = BoneDataset_adjust(dataframe = test_df, img_dir = img_dir, transform = data_transform, age = [10,11,12], adjust_type = adjust, adjust_scale = adjust_scale[0])
+    ind = BoneDataset_adjust(dataframe = test_df, img_dir = img_dir, transform = data_transform, adjust_type = adjust, adjust_scale = adjust_scale[0])
     ind_len = len(ind)
     data_len.append(ind_len)
 #     ind_loader = DataLoader(ind, batch_size=ind_len, shuffle=True)
     # ind_loader = DataLoader(ind, batch_size=256, shuffle=False, pin_memory=True, drop_last=False)
     ##use this for odin and godin eval
-    ind_loader = DataLoader(ind, batch_size=16, shuffle=False, pin_memory=True, drop_last=False)
-    
+    ind_loader = DataLoader(ind, batch_size=16, shuffle=False, drop_last=False)
     loaders.append(ind_loader)
     
     for adjustness in adjust_scale[1:]:
@@ -234,37 +244,12 @@ def get_adjust_dataloaders(bones_df, train_df, val_df, test_df, img_dir, data_tr
             data_len.append(ind_len)
             loaders.append(ind_loader)
         else:
-            ood = BoneDataset_adjust(dataframe = test_df, img_dir = img_dir, transform = data_transform, age = [10,11,12], adjust_type = adjust, adjust_scale = adjustness)
+            ood = BoneDataset_adjust(dataframe = test_df, img_dir = img_dir, transform = data_transform, adjust_type = adjust, adjust_scale = adjustness)
             ood_len = len(ood)
             data_len.append(ood_len)
     #         ood_loader = DataLoader(ood, batch_size=ood_len, shuffle=True)
             # ood_loader = DataLoader(ood, batch_size=256, shuffle=False, pin_memory=True, drop_last=False)
             ##use this for odin and godin eval
-            ood_loader = DataLoader(ood, batch_size=16, shuffle=False, pin_memory=True, drop_last=False)
+            ood_loader = DataLoader(ood, batch_size=16, shuffle=False, drop_last=False)
             loaders.append(ood_loader)
     return loaders, data_len, adjust_scale
-    
-
-def get_eval_dataloaders(bones_df, train_df, val_df, test_df, img_dir, data_transform, age_groups):
-    """Dataloader function to obtain datasets (distributionally shifted by age). Parameter age_groups specifies the age bins for distributionally shifted datasets."""
-    loaders = []
-    data_len = []
-    ind = BoneDataset(dataframe = test_df, img_dir = img_dir, mode = 'test', transform = data_transform)
-    ind_len = len(ind)
-#     ind_loader = DataLoader(ind, batch_size=ind_len, shuffle=False)
-
-    ind_loader = DataLoader(ind, batch_size=64, shuffle=False, pin_memory=True, drop_last=False)
-    age_grps = age_groups
-    n = len(age_grps)
-    for i in range(n):
-        if(age_grps[i] == [10,11,12]):
-            data_len.append(ind_len)
-            loaders.append(ind_loader)
-        else:
-            ood = BoneDataset(dataframe = bones_df, img_dir = img_dir, mode = 'test', transform = data_transform, age = age_grps[i])
-            ood_len = len(ood)
-            data_len.append(ood_len)
-#             ood_loader = DataLoader(ood, batch_size=ood_len, shuffle=False)
-            ood_loader = DataLoader(ood, batch_size=64, shuffle=False, pin_memory=True, drop_last=False)
-            loaders.append(ood_loader)
-    return loaders, data_len
