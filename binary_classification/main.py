@@ -7,20 +7,22 @@ import torch.optim as optim
 from tqdm import tqdm
 from sklearn.metrics import roc_auc_score
 import cv2
-from utils import *
-from dataset import *
 import wandb
 import time 
 
+from utils import *
+from dataset import *
+
+torch.set_num_threads(1)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 parser = argparse.ArgumentParser(description='Pytorch Detecting Out-of-distribution examples in neural networks')
 parser.add_argument('--run_mode', default="test", type=str, help='train or test')
-parser.add_argument('--num_classes', default=2, type=int, help='number of classes')
-parser.add_argument('--result_path', default="./results_22_01", type=str, help='path of model')
+# parser.add_argument('--num_classes', default=2, type=int, help='number of classes')
+parser.add_argument('--result_path', default="./results", type=str, help='path of model')
 parser.add_argument('--seed', default=0, type=int, help='set seed')
 parser.add_argument('--variation', default=0, type=str, help='age, bright, contrast, impulse_noise, shot_noise, gaussian_noise')
-parser.add_argument('--aug_type', default="basic", type=str, help='simclr or basic')
+# parser.add_argument('--aug_type', default="basic", type=str, help='simclr or basic')
 parser.add_argument('--epoch', default=30, type=int, help='no of epochs')
 parser.add_argument('--data_path', default="./data", type=str, help='path of the dataset')
 parser.set_defaults(argument=True)
@@ -87,7 +89,6 @@ def train(args, bones_df, train_df, val_df, test_df, data_transform):
 
     for epoch in range(args.epoch):
         start_time = time.process_time()
-        
         model.train()
         running_loss = 0.0
         
@@ -142,7 +143,7 @@ def train(args, bones_df, train_df, val_df, test_df, data_transform):
                 val_correct += (predicted == labels).sum().item()
             
         val_acc = (100 * val_correct / val_total)
-        table = 'Epoch: {}, Validation acc: {}, epoch time : {} seconds'.format(epoch+1, val_acc,  time.process_time() - start_time)
+        table = 'Epoch: {}, Validation acc: {}, epoch time : {} seconds'.format(epoch + 1, val_acc,  time.process_time() - start_time)
         if val_acc >= best_acc:
             best_acc = val_acc
             epochs_no_improve = 0
@@ -205,19 +206,12 @@ def test(args, bones_df, train_df, val_df, test_df, data_transform):
         
                 
 
-def ood_test(args, bones_df, train_df, val_df, test_df, data_transform, adjust = "age"):
+def ood_test(args, bones_df, train_df, val_df, test_df, data_transform, adjust = "bright"):
     """ Function to test classification performance of the trained model on distributionally shifted datasets. Calculates accuracy on each OOD dataset."""       
     images_dir = os.path.join(args.data_path, 'boneage-training-dataset/boneage-training-dataset/')
 
-    if adjust == "age":
-        age_groups = [[1,2,3,4,5],[6],[7],[8],[9],[10,11,12],[13],[14],[15,16,17,18,19]]
-        log_file = os.path.join(args.result_path, "logs", "ood_age_200_test_log_{}.txt".format(args.seed))
-        # load dataloaders
-        loaders, data_len = get_eval_dataloaders(bones_df, train_df, val_df, test_df, images_dir, data_transform, age_groups)
-        len_ood = len(age_groups)
-    else:
-        log_file = os.path.join(args.result_path, "logs", "ood_{}_test_log_{}.txt".format(adjust, args.seed))
-        loaders, data_len, adjust_scale = get_adjust_dataloaders(bones_df, train_df, val_df, test_df, images_dir, data_transform, adjust)
+    log_file = os.path.join(args.result_path, "logs", "ood_{}_test_log_{}.txt".format(adjust, args.seed))
+    loaders, data_len, adjust_scale = get_adjust_dataloaders(bones_df, train_df, val_df, test_df, images_dir, data_transform, adjust)
     
     with open(log_file, "w") as file:
         file.write("")
@@ -246,10 +240,7 @@ def ood_test(args, bones_df, train_df, val_df, test_df, data_transform, adjust =
                 ##### classification accuracy ####
                 test_total += labels.size(0)
                 test_correct += (predicted == labels).sum().item()
-            if adjust == "age":     
-                table = 'age: {}, Len:{}, Test acc: {}\n'.format(age_groups[i], data_len[i], (100 * test_correct / test_total))
-            else:
-                table = 'adjustness: {}, Len:{}, Test acc: {}\n'.format(adjust_scale[i], data_len[i], (100 * test_correct / test_total))
+            table = 'adjustness: {}, Len:{}, Test acc: {}\n'.format(adjust_scale[i], data_len[i], (100 * test_correct / test_total))
             
             with open(log_file, "a") as file:
                 file.write(table)
@@ -258,11 +249,14 @@ def ood_test(args, bones_df, train_df, val_df, test_df, data_transform, adjust =
 def main():
     args = parser.parse_args()
     set_seed(args.seed)
+    # torch.backends.cudnn.benchmark = True
+
     bones_df, train_df, val_df, test_df, data_transform = Data_Transform(args.data_path)
     if args.run_mode == 'train':
         train(args, bones_df, train_df, val_df, test_df, data_transform)
-        test(args, bones_df, train_df, val_df, test_df, data_transform)
     elif args.run_mode == 'test':
+        test(args, bones_df, train_df, val_df, test_df, data_transform)
+    elif args.run_mode == 'ood_test':
         ood_test(args, bones_df, train_df, val_df, test_df, data_transform, args.variation)
     else:
         print("not available mode")
