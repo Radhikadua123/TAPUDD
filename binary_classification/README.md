@@ -1,15 +1,14 @@
 # Experiments on Binary classification
 
-Please download the [dataset](https://www.kaggle.com/datasets/kmader/rsna-bone-age) and use it's path in all the scripts.
+Please download the [dataset](https://www.kaggle.com/datasets/kmader/rsna-bone-age) and use it's path in all the scripts. We stored the data in `/home/data_storage/ood_datasets/data/datasets/boneage_data_kaggle/`.
 
-## Training
+## Training and testing the gender classification model
 
-To train the gender classification model, please run:
+To train the gender classification model and test it on the ID test set and NAS datasets, please please modify `/home/data_storage/ood_datasets/data/datasets/boneage_data_kaggle/` with dataset path and run:
 
 ```
-bash ./scripts/train.sh
+bash ./scripts/train.sh /home/data_storage/ood_datasets/data/datasets/boneage_data_kaggle/
 ```
-
 
 ## OOD Detection Evaluation
 
