@@ -33,7 +33,7 @@ bash ./scripts/test_mos.sh
 
 Note: before testing Mahalanobis, make sure you have tuned and saved its hyperparameters first by running:
 ```
-bash ./scripts/tune_mahalanobis.sh
+bash ./scripts/tune_mahalanobis.sh /home/data_storage/ood_datasets/data/datasets/boneage_data_kaggle/
 ```
 
 ## OOD Detection Results
