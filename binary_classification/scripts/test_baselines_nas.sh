@@ -2,10 +2,11 @@
 
 device=3
 adjust_type=bright
-data_path="/home/data_storage/radhika/data/datasets/boneage_data_kaggle/"
-path="./results_ce"
+method=$1
+data_path=$2
+path="./results"
 
-for METHOD in Mahalanobis ; do
+for METHOD in method ; do
     for inp_seed in 0 1 2 3 4 663 1458 1708 1955 7130; do
         loader_index=1
         for adjust_scale in $(seq 0.0 0.1 1.9) $(seq 2.0 0.5 7.5); do
