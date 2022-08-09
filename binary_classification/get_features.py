@@ -10,6 +10,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import torch.optim as optim
 import cv2
+
 from utils import *
 from dataset import *
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -53,7 +54,6 @@ def get_trainftrs(model, args, train_loader = None, device = None):
     features = []
     targets = []
     preds = []
-    print("inside")
     i = 0 
     
     for idx_ins, data in tqdm(enumerate(train_loader)):
@@ -63,20 +63,22 @@ def get_trainftrs(model, args, train_loader = None, device = None):
         images = images.to(args.device)
         labels = labels.to(args.device)
         print("args.device", args.device)
+
         with torch.no_grad():
             #forward
-            feautre_small = get_features(model, images, 2) #N, 128
-
-            logits, outputs = get_outputs(model, images, args) 
+            feature_small = get_features(model, images, 2) #N, 128
+            outputs = model(images) 
             predicted_value, predicted = torch.max(outputs.data, 1)
             trgs_small = labels
-            preds_small = predicted_value
-        features.append(feautre_small)
+            preds_small = predicted
+
+        features.append(feature_small)
         targets.append(trgs_small)
         preds.append(preds_small)
         i += 1
-    features_all=torch.cat(features)
-    trgs_all=torch.cat(targets)    
+
+    features_all = torch.cat(features)
+    trgs_all = torch.cat(targets)    
     preds_all = torch.cat(preds)  
     dir_path = os.path.join(args.result_path, "seed_" + str(args.seed), "penultimate_ftrs")
     os.makedirs(dir_path, exist_ok=True)
@@ -90,7 +92,6 @@ def get_trainftrs(model, args, train_loader = None, device = None):
         trg_pth = os.path.join(dir_path, "trgs_age_{}.npy".format('train'))
         preds_pth = os.path.join(dir_path, "preds_age_{}.npy".format('train'))
     
-
     np.save(file_path, features_all.detach().cpu().numpy())
     np.save(trg_pth, trgs_all.detach().cpu().numpy())
     np.save(preds_pth, preds_all.detach().cpu().numpy())
@@ -128,18 +129,18 @@ def test(model, args, train_loader = None, loaders = None, device = None,train_l
             labels = labels.to(args.device)
             #forward
             with torch.no_grad():
-                feautre_small = get_features(model, images, 2) #N, 128   
-                logits, outputs = get_outputs(model, images, args) 
+                feature_small = get_features(model, images, 2) #N, 128   
+                outputs = model(images) 
                 predicted_value, predicted = torch.max(outputs.data, 1)
-                preds_small = predicted_value
+                preds_small = predicted
 
             trgs_small = labels
-            features.append(feautre_small)
+            features.append(feature_small)
             targets.append(trgs_small)
             preds.append(preds_small)
 
-        features_all=torch.cat(features)
-        trgs_all=torch.cat(targets)    
+        features_all = torch.cat(features)
+        trgs_all = torch.cat(targets)    
         preds_all = torch.cat(preds)        
 
         dir_path = os.path.join(args.result_path, "seed_" + str(args.seed), "penultimate_ftrs")
@@ -190,8 +191,8 @@ def main():
 
     
     train_dataset = BoneDataset(dataframe = train_df, img_dir = images_dir, mode = 'train', transform = data_transform)
-    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
-    train_loader_mu = DataLoader(train_dataset, batch_size=64, shuffle=True)
+    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=False)
+    train_loader_mu = DataLoader(train_dataset, batch_size=64, shuffle=False)
 
     ##############################
     # Define model and load weights
@@ -201,10 +202,20 @@ def main():
     model.eval()
     
     ###############################
-    # Obtain penultimate layer features for train and OOD data.
+    # Obtain penultimate layer features for ood and train datasets.
     ###############################
     test(model, args, train_loader = train_loader, loaders = loaders, device = device, train_loader_mu = train_loader_mu)
-    get_trainftrs(model, args, train_loader = train_loader, device = device)
+
+    dir_path = os.path.join(args.result_path, "seed_" + str(args.seed), "penultimate_ftrs")
+    os.makedirs(dir_path, exist_ok=True)
+
+    if args.flag_adjust:
+        file_path = os.path.join(dir_path, "ftrs_{}_{}.npy".format(args.variation, 'train'))
+    else:
+        file_path = os.path.join(dir_path, "ftrs_age_{}.npy".format('train'))
+    
+    if not os.path.exists(file_path):
+        get_trainftrs(model, args, train_loader = train_loader, device = device)
             
 if __name__ == '__main__':
     main()
