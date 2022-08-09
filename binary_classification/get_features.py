@@ -13,6 +13,8 @@ import cv2
 
 from utils import *
 from dataset import *
+
+torch.set_num_threads(1)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 features = None
@@ -80,7 +82,7 @@ def get_trainftrs(model, args, train_loader = None, device = None):
     features_all = torch.cat(features)
     trgs_all = torch.cat(targets)    
     preds_all = torch.cat(preds)  
-    dir_path = os.path.join(args.result_path, "seed_" + str(args.seed), "penultimate_ftrs")
+    dir_path = os.path.join(args.result_path, "penultimate_ftrs", "seed_" + str(args.seed))
     os.makedirs(dir_path, exist_ok=True)
 
     if args.flag_adjust:
@@ -143,7 +145,7 @@ def test(model, args, train_loader = None, loaders = None, device = None,train_l
         trgs_all = torch.cat(targets)    
         preds_all = torch.cat(preds)        
 
-        dir_path = os.path.join(args.result_path, "seed_" + str(args.seed), "penultimate_ftrs")
+        dir_path = os.path.join(args.result_path, "penultimate_ftrs", "seed_" + str(args.seed))
         os.makedirs(dir_path, exist_ok=True)
         if args.flag_adjust:
             file_path = os.path.join(dir_path, "ftrs_{}_{}.npy".format(args.variation, idx))
@@ -206,7 +208,7 @@ def main():
     ###############################
     test(model, args, train_loader = train_loader, loaders = loaders, device = device, train_loader_mu = train_loader_mu)
 
-    dir_path = os.path.join(args.result_path, "seed_" + str(args.seed), "penultimate_ftrs")
+    dir_path = os.path.join(args.result_path, "penultimate_ftrs", "seed_" + str(args.seed))
     os.makedirs(dir_path, exist_ok=True)
 
     if args.flag_adjust:
