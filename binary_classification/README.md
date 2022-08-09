@@ -14,16 +14,16 @@ Model weights will be stored in `results/models/` and results will be stored in 
 
 ## OOD Detection Evaluation
 
-To reproduce our TAP-Mahalanobis and TAP-Ensemble results, please modify the `/home/data_storage/ood_datasets/data/datasets/boneage_data_kaggle/` with dataset path and run the following commands for feature extraction followed by ood fetection using TAP-Mahalanobis and TAPUDD:
+To reproduce our TAP-Mahalanobis and TAP-Ensemble results, please modify `/home/data_storage/ood_datasets/data/datasets/boneage_data_kaggle/` with dataset path and run the following commands for feature extraction followed by ood fetection using TAP-Mahalanobis and TAPUDD:
 ```
 bash ./scripts/get_penultimate_features.sh /home/data_storage/ood_datasets/data/datasets/boneage_data_kaggle/
 bash ./scripts/test_ours.sh 
 bash ./scripts/test_ours_ensemble.sh 
 ```
 
-To reproduce baseline approaches (MSP, ODIN, Energy, Mahalanobis, KL_Div), please run:
+To reproduce baseline approaches (MSP, ODIN, Energy, Mahalanobis, KL_Div), please modify `/home/data_storage/ood_datasets/data/datasets/boneage_data_kaggle/` with dataset path and run:
 ```
-bash ./scripts/test_baselines.sh MSP(/ODIN/Energy/Mahalanobis/KL_Div) 
+bash ./scripts/test_baselines.sh MSP(/ODIN/Energy/Mahalanobis/KL_Div) /home/data_storage/ood_datasets/data/datasets/boneage_data_kaggle/
 ```
 
 To reproduce MOS, please run:
