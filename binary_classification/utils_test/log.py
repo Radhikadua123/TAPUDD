@@ -45,7 +45,7 @@ def setup_logger(args):
 def setup_tune_mahala_logger(args):
     """Creates and returns a fancy logger."""
     # return logging.basicConfig(level=logging.INFO, format="[%(asctime)s] %(message)s")
-    os.makedirs(os.path.join(args.logdir, "seed_" + str(args.seed)), exist_ok=True)
+    os.makedirs(os.path.join(args.logdir, args.name), exist_ok=True)
     logging.config.dictConfig({
         "version": 1,
         "disable_existing_loggers": False,
@@ -65,7 +65,7 @@ def setup_tune_mahala_logger(args):
                 "level": "DEBUG",
                 "formatter": "standard",
                 "class": "logging.FileHandler",
-                "filename": os.path.join(args.logdir, "seed_" + str(args.seed), "tune_mahala.log"),
+                "filename": os.path.join(args.logdir, args.name, "tune_mahala.log"),
                 "mode": "a",
             }
         },
