@@ -1,4 +1,3 @@
-from utils_test import log
 import torch
 import time
 import torchvision as tv
@@ -6,6 +5,8 @@ import numpy as np
 import argparse
 from utils_test.test_utils import get_measures
 import os
+
+from utils_test import log
 from utils import *
 from dataset import *
 from torch.autograd import Variable
@@ -14,19 +15,20 @@ import torch.nn as nn
 import pickle5 as pickle
 from sklearn.linear_model import LogisticRegressionCV
 
-
 torch.cuda.empty_cache()
-
 torch.manual_seed(1)
 torch.cuda.manual_seed(1)
 np.random.seed(1)
 
+features = None
 
+def get_features_hook(self, input, output):
+    global features
+    features = [output]
 
 def tune_mahalanobis_hyperparams(args, model, num_classes, train_loader, val_loader, logger):
 
     save_dir = os.path.join(args.logdir, args.name, 'tmp')
-
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
@@ -243,7 +245,7 @@ def tune_mahalanobis_hyperparams(args, model, num_classes, train_loader, val_loa
 
 
 def main(args):
-    logger = log.setup_logger(args)
+    logger = log.setup_tune_mahala_logger(args)
     # Lets cuDNN benchmark conv implementations and choose the fastest.
     # Only good if sizes stay the same within the main loop!
     torch.backends.cudnn.benchmark = True
@@ -293,6 +295,6 @@ if __name__ == "__main__":
                         help="Name of this run. Used for monitoring and checkpointing.")
     parser.add_argument('--data_path', default="./data", type=str, help='path of the dataset')
     parser.add_argument('--seed', default=0, type=int, help='set seed')
-    parser.add_argument('--result_path', default="./results_22_01", type=str, help='path of model')
+    parser.add_argument('--result_path', default="./results", type=str, help='path of model')
 
     main(parser.parse_args())
