@@ -15,6 +15,7 @@ import torch.nn as nn
 import pickle5 as pickle
 from sklearn.linear_model import LogisticRegressionCV
 
+torch.set_num_threads(1)
 torch.cuda.empty_cache()
 torch.manual_seed(1)
 torch.cuda.manual_seed(1)
