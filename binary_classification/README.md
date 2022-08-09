@@ -10,6 +10,8 @@ To train the gender classification model and test it on the ID test set and NAS 
 bash ./scripts/train.sh /home/data_storage/ood_datasets/data/datasets/boneage_data_kaggle/
 ```
 
+Model weights will be stored in `results/models/` and results will be stored in `results/logs/`.
+
 ## OOD Detection Evaluation
 
 To reproduce our TAP-Mahalanobis and TAP-Ensemble results, please run the following commands for feature extraction followed by :
