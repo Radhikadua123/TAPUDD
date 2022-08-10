@@ -23,7 +23,7 @@ bash ./scripts/test_ours_ensemble.sh
 
 To reproduce baseline approaches (MSP, ODIN, Energy, Mahalanobis, KL_Div), please modify `/home/data_storage/ood_datasets/data/datasets/boneage_data_kaggle/` with dataset path and run:
 ```
-bash ./scripts/test_baselines.sh MSP(/ODIN/Energy/Mahalanobis/KL_Div) /home/data_storage/ood_datasets/data/datasets/boneage_data_kaggle/
+bash ./scripts/test_baselines_nas.sh MSP(/ODIN/Energy/Mahalanobis/KL_Div) /home/data_storage/ood_datasets/data/datasets/boneage_data_kaggle/
 ```
 
 To reproduce MOS, please run:
