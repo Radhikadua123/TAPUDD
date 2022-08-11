@@ -17,7 +17,7 @@ Model weights will be stored in `results/models/` and results will be stored in 
 To reproduce our TAP-Mahalanobis and TAP-Ensemble results, please modify `/home/data_storage/ood_datasets/data/datasets/boneage_data_kaggle/` with dataset path and run the following commands for feature extraction followed by ood fetection using TAP-Mahalanobis and TAPUDD:
 ```
 bash ./scripts/get_penultimate_features.sh /home/data_storage/ood_datasets/data/datasets/boneage_data_kaggle/
-bash ./scripts/test_ours.sh 
+bash ./scripts/test_tap_mahalanobis_nas.sh 
 bash ./scripts/test_ours_ensemble.sh 
 ```
 
