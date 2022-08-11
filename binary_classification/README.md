@@ -18,7 +18,7 @@ To reproduce our TAP-Mahalanobis and TAP-Ensemble results, please modify `/home/
 ```
 bash ./scripts/get_penultimate_features.sh /home/data_storage/ood_datasets/data/datasets/boneage_data_kaggle/
 bash ./scripts/test_tap_mahalanobis_nas.sh 
-bash ./scripts/test_ours_ensemble.sh 
+bash ./scripts/test_tapudd.sh 
 ```
 
 To reproduce baseline approaches (MSP, ODIN, Energy, Mahalanobis, KL_Div), please modify `/home/data_storage/ood_datasets/data/datasets/boneage_data_kaggle/` with dataset path and run:
