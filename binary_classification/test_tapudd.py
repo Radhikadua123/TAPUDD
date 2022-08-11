@@ -12,7 +12,7 @@ from utils_test.test_utils import stable_cumsum, fpr_and_fdr_at_recall, get_meas
 def MahalaEnsemble(args, logger, input_seed, gmm_state, clusters, adjust_type, adjust_scale, logdir, reverse, best):
     
     for cluster in clusters:
-        name2 = f"NAS_DETECTION_{str(adjust_type)}_test_TAPUDD/seed_{str(input_seed)}/cluster{str(cluster)}"
+        name2 = f"NAS_DETECTION_{str(adjust_type)}_test_TAP_Mahalanobis/seed_{str(input_seed)}/cluster{str(cluster)}"
         file_path_ood_scores = os.path.join(logdir, name2, str(adjust_scale), "ood_scores.npy")
         file_path_id_scores = os.path.join(logdir, name2, "1.0", "ood_scores.npy")
         in_examples = np.load(file_path_id_scores)
