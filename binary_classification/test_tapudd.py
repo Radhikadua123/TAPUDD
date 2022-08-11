@@ -115,52 +115,6 @@ def EnsembleTop8(logger, args, labels, gmm_Df, length_in_egs, reverse=False, bes
     path_auroc_aupr = os.path.join(args.logdir, args.name, args.adjust_scale)
     auc_roc, auc_aupr_in, auc_aupr_out = plot_aupr_auroc(in_examples, out_examples, path_auroc_aupr)
 
-    # hist_mean_ood = -np.log(-np.array(mean[length_in_egs:]) + 2)
-    # hist_mean_id = -np.log(-np.array(mean[:length_in_egs]) + 2)
-
-    # hist_std_ood = np.log(np.array(std[length_in_egs:]) + 2)
-    # hist_std_id = np.log(np.array(std[:length_in_egs]) + 2)
-
-    # hist_scaled_mean_ood = -np.log(-np.array(mean[length_in_egs:]) + 2) * np.log(np.array(std[length_in_egs:]) + 2)
-    # hist_scaled_mean_id = -np.log(-np.array(mean[:length_in_egs]) + 2) * np.log(np.array(std[:length_in_egs]) + 2)
-
-
-    # print("before min and max id", min(hist_mean_id), max(hist_mean_id))
-    # print("before min and max ood", min(hist_mean_ood), max(hist_mean_ood))
-
-    # print("after min and max id", min(hist_scaled_mean_id), max(hist_scaled_mean_id))
-    # print("after min and max ood", min(hist_scaled_mean_ood), max(hist_scaled_mean_ood))
-
-    # plt.figure(figsize=(5, 5))
-    # plt.hist(hist_mean_id, bins='auto', label = "ID", alpha = 0.5)
-    # plt.hist(hist_mean_ood, bins='auto', label = "OOD", alpha = 0.5)
-    # plt.legend()
-    # plt.title("Histogram of MEAN_MB")
-    # plt.xlim([-40, 10])
-    # plt.ylim([0, 400])
-    # path1 = os.path.join(path_auroc_aupr, 'hist_mean.png')
-    # plt.savefig(path1, bbox_inches='tight', dpi=300)
-
-    # plt.figure(figsize=(5, 5))
-    # plt.hist(hist_std_id, bins='auto', label = "ID", alpha = 0.5)
-    # plt.hist(hist_std_ood, bins='auto', label = "OOD", alpha = 0.5)
-    # plt.legend()
-    # plt.title("Histogram of STD_MB")
-    # plt.xlim([-10, 60])
-    # plt.ylim([0, 400])
-    # path1 = os.path.join(path_auroc_aupr, 'hist_std.png')
-    # plt.savefig(path1, bbox_inches='tight', dpi=300)
-
-    # plt.figure(figsize=(5, 5))
-    # plt.hist(hist_scaled_mean_id, bins='auto', label = "ID", alpha = 0.5)
-    # plt.hist(hist_scaled_mean_ood, bins='auto', label = "OOD", alpha = 0.5)
-    # plt.ylim([0, 400])
-    # plt.xlim([-60, 0])
-    # plt.legend()
-    # plt.title("Histogram of Scaled MEAN_MB")
-    # path1 = os.path.join(path_auroc_aupr, 'hist_scaled_mean.png')
-    # plt.savefig(path1, bbox_inches='tight', dpi=300)
-
     logger.info('=================== Results for GMM + Mahala =================')
     logger.info('AUROC: {}'.format(auroc))
     logger.info('AUPR (In): {}'.format(aupr_in))
