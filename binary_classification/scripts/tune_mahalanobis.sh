@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-device=3
-data_path="/home/data_storage/radhika/data/datasets/boneage_data_kaggle/"
-path="./results_ce"
+device=2
+data_path=$1
+path="./results"
 
-for inp_seed in 663 1458 1708 1955 7130; do
+for inp_seed in 0 1 2 3 4 663 1458 1708 1955 7130; do
     CUDA_VISIBLE_DEVICES=${device} python tune_mahalanobis_hyperparameter.py \
     --name seed_${inp_seed} \
-    --logdir /home/radhika/assign/binary_classification/results_ce/tune_mahalanobis \
+    --logdir results/tune_mahalanobis \
     --batch 8 \
     --data_path ${data_path} \
     --seed ${inp_seed} \
