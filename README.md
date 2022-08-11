@@ -22,12 +22,18 @@ We propose a novel, **T**ask **A**gnostic and **P**ost-hoc **U**nseen **D**istri
 ![method](images/method.png)
 
 ## Prerequisites
+### Loading the environment
+
+Make sure you have Anaconda installed before you create and activate this environment.
+
 ```
-$ conda env create -f environment.yml
+conda env create -f environment.yml
+conda activate conda_env_tapudd
 ```
 
+
 ## Experiments and Results
-Code for the experiments on synthetic datasets, binary classification, multi-class classification, and regression are inside the respective folders:
+Code and details for the experiments on synthetic datasets, binary classification, multi-class classification, and regression are inside the respective folders:
 
 - [Synthetic datasets](https://github.com/Radhikadua123/TAG/tree/main/synthetic_2d_binary_classification)
 - [Binary classification task](https://github.com/Radhikadua123/TAG/tree/main/binary_classification)
