@@ -1,40 +1,41 @@
 import os
 import cv2
-import torch
+import time
 import random
 import pickle
+import argparse
 import numpy as np
 import pandas as pd
 from PIL import Image
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
-from sklearn.manifold import TSNE
-from sklearn.decomposition import PCA
+
+import torch
+import torch.nn as nn
+import torch.optim as optim
 from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
+import torchvision as tv
+import torchvision.models as models
+import torchvision.transforms as transforms
+
+import sklearn.metrics as sk
+from sklearn.manifold import TSNE
+from sklearn.decomposition import PCA
 from sklearn.metrics import roc_auc_score
 from sklearn.cluster import KMeans
 from sklearn.mixture import GaussianMixture
-import torchvision.transforms as transforms
+
 CUDA_LAUNCH_BLOCKING=1
 
-from torch.utils.data import Dataset
-import argparse
-import torchvision as tv
-import torch
-import numpy as np
-import sklearn.metrics as sk
+from utils import *
+from dataset import *
 from utils_test.mahalanobis_ours import *
 from utils_test import log
 from utils_test.test_utils import arg_parser
 from utils_test.test_utils import stable_cumsum, fpr_and_fdr_at_recall, get_measures, plot_aupr_auroc
-import torch.nn as nn
-import torchvision.models as models
-import torch.optim as optim
-import time
-from utils import *
-from dataset import *
 
+torch.set_num_threads(1)
     
 def mk_id_ood(ood_feats, in_feats):
     """Returns train and validation datasets."""
@@ -96,13 +97,6 @@ def run_eval(logger, model, args, estimator, num_groups, clustering_type, covar_
     logger.info("Running test...")
     logger.flush()
     
-    if metric == 'mahalanobis':
-        #### get feature list of model used for getting mahala stats #######
-        # set information about feature extaction
-        feature_list = get_feature_list(model, device=device)
-        if(clustering_type != "gaussian"):
-            mean, var = sample_estimator(model, num_classes=num_groups, feature_list= feature_list, train_loader = train_loader, device = device)
-        
     model.eval()
     out_score =[]
     in_score = []
