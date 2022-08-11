@@ -1,7 +1,7 @@
 # Task Agnostic and Post-hoc </br> Unseen Distribution Detection
 This is the official *Pytorch Implementation* for the paper [Task Agnostic and Post-hoc Unseen Distribution Detection](https://arxiv.org/abs/2207.13083). It currently includes code multi-class classification, binary classification, regression.
 
-**Authors**: [Radhika Dua](https://radhikadua123.github.io), Seongjun Yang, [Yixuan Li](https://pages.cs.wisc.edu/~sharonli/), [Edward Choi](https://mp2893.com)
+**Authors**: [_Radhika Dua_](https://radhikadua123.github.io), [_Seongjun Yang_](https://scholar.google.com/citations?user=OxSABfkAAAAJ&hl=ko), [_Yixuan Li_](https://pages.cs.wisc.edu/~sharonli/), [_Edward Choi_](https://mp2893.com)
 
 ## Abstract
 Despite the recent advances in out-of-distribution(OOD) detection, anomaly detection, and uncertainty estimation tasks, there do not exist a task-agnostic and post-hoc approach.
