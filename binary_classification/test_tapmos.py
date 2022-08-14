@@ -37,7 +37,7 @@ from dataset import *
 from utils_test.utils_mos_ours import *
 
 
-def run_eval(logger, model, args, in_loader, out_loader, group_slices, device):
+def run_eval(logger, model, args, estimator, in_loader, out_loader, group_slices, device):
     # switch to evaluate mode
     model.eval()
     logger.info("Running test...")
@@ -82,29 +82,40 @@ def unsupervised_ood_detection(logger, args, num_of_clusters, clustering_type, c
     torch.backends.cudnn.benchmark = False
     
     train_feats_df = []
-
     train_feats = np.load(args.train_feats_path)
-    train_labels = np.load(args.train_labels_path)
-    print(train_feats.shape)
     train_feats_df.extend(train_feats)
-
     train_Df = pd.DataFrame(list(zip(train_feats_df)), columns=["feats"])
     
-    print(len(train_Df))
+    # Apply clustering
+    if(clustering_type == "kmeans"):
+        estimator = KMeans(n_clusters = num_of_clusters)
+    else:
+        estimator = GaussianMixture(n_components=num_of_clusters, covariance_type=covar_type, random_state = args.gmm_random_state)
     
-    labels_list = []
-    for i in train_labels:
-        labels_list.append(i[0])
+    clustering_model_path = args.clustering_model_path
+    os.makedirs(clustering_model_path, exist_ok=True)
+    clustering_model_path_file = os.path.join(clustering_model_path, f'estimator_cluster_{num_of_clusters}.sav')
 
-    train_Df["Cluster"] = labels_list
+    if os.path.exists(clustering_model_path_file):
+        estimator = pickle.load(open(clustering_model_path_file, 'rb'))
+        print("Loading weights from saved clustering estimator")
+        
+    else:
+        estimator.fit(train_feats_df)
+        pickle.dump(estimator, open(clustering_model_path_file, 'wb'))
+        clusters = estimator.predict(train_feats_df)
+        print("Fitting estimator and saving weights of the clustering estimator")
+    
+
+    clusters = estimator.predict(train_feats_df)
+    train_Df["Cluster"] = clusters
 
     train_loader, val_loader, test_loader = data_cluster_classification(train_Df, num_of_clusters)
 
-    result_path = "results_ce/mos_our_ver_supervised_models/seed_" + str(args.seed)
-    model_pth = os.path.join(result_path, "models_gaussian_grouping_mos")
+    result_path = "results/tapmos_models/seed_" + str(args.seed)
+    model_pth = result_path
     os.makedirs(model_pth, exist_ok=True)
-    best_file = os.path.join(result_path, "models_gaussian_grouping_mos", "cluster_classifier_k_{}.pt".format(num_of_clusters))
-    
+    best_file = os.path.join(result_path, "cluster_classifier_k_{}.pt".format(num_of_clusters))
     ## """ train model for cluster classification"""
     if os.path.exists(best_file):
         print("cluster_classification model already present")
@@ -120,7 +131,7 @@ def unsupervised_ood_detection(logger, args, num_of_clusters, clustering_type, c
 
     model = define_model_cluster_classification(device, num_logits)
     model.to(device)
-    model.load_state_dict(torch.load(os.path.join(result_path, "models_gaussian_grouping_mos", "cluster_classifier_k_{}.pt".format(num_of_clusters))))
+    model.load_state_dict(torch.load(os.path.join(result_path, "cluster_classifier_k_{}.pt".format(num_of_clusters))))
 
     ood_feats = []
     in_feats = []
@@ -131,7 +142,7 @@ def unsupervised_ood_detection(logger, args, num_of_clusters, clustering_type, c
     in_loader, out_loader = mk_id_ood(ood_feats, in_feats)
     
     print("############# NUMBER OF CLUSTERS ############", num_of_clusters)
-    run_eval(logger, model, args, in_loader, out_loader, group_slices, device)
+    run_eval(logger, model, args, estimator, in_loader, out_loader, group_slices, device)
 
    
 
@@ -156,11 +167,12 @@ if __name__ == "__main__":
     parser = arg_parser()
     parser.add_argument('--result_path', help='id features path')
     parser.add_argument('--train_feats_path', help='train features path')
-    parser.add_argument('--train_labels_path', help='train labels path')
     parser.add_argument('--ood_feats_path', help='ood features path')
     parser.add_argument('--id_feats_path', help='id features path')
     parser.add_argument("--num_of_clusters", required=True)
     parser.add_argument('--seed', default=0, type=int, help='set seed')
+    parser.add_argument('--gmm_random_state', default=0, type=int, help='gmm random state')
+    parser.add_argument("--clustering_model_path", required=True)
     parser.add_argument("--adjust_type", required=True)
     parser.add_argument("--adjust_scale", required=True)
     

@@ -237,13 +237,13 @@ def train(seed, train_loader, val_loader, test_loader, num_of_clusters, device, 
     # define model/log pth
     ##############################
     
-    model_pth = os.path.join(result_path, "models_gaussian_grouping_mos")
-    log_pth = os.path.join(result_path, "logs_gaussian_grouping_mos")
+    model_pth = result_path
+    log_pth = result_path
     os.makedirs(model_pth, exist_ok=True)
     os.makedirs(log_pth, exist_ok=True)
 
-    best_file = os.path.join(result_path, "models_gaussian_grouping_mos", "cluster_classifier_k_{}.pt".format(num_of_clusters))
-    log_file = os.path.join(result_path, "logs_gaussian_grouping_mos", "cluster_classifier_train_log_k_{}.txt".format(num_of_clusters))
+    best_file = os.path.join(result_path, "cluster_classifier_k_{}.pt".format(num_of_clusters))
+    log_file = os.path.join(result_path, "cluster_classifier_train_log_k_{}.txt".format(num_of_clusters))
 
 
     with open(log_file, "w") as file:
@@ -344,9 +344,9 @@ def train(seed, train_loader, val_loader, test_loader, num_of_clusters, device, 
 
 def test(seed, test_loader, num_of_clusters, device, result_path): 
     """ Function to test classification performance of the trained model on in-distribution test data. Calculates accuracy on in-distribution test data."""       
-    log_pth = os.path.join(result_path, "logs_gaussian_grouping_mos")
+    log_pth = result_path
     os.makedirs(log_pth, exist_ok=True)
-    log_file = os.path.join(result_path, "logs_gaussian_grouping_mos", "cluster_classifier_test_log_k_{}.txt".format(num_of_clusters))
+    log_file = os.path.join(result_path, "cluster_classifier_test_log_k_{}.txt".format(num_of_clusters))
     with open(log_file, "w") as file:
         file.write("")
     
@@ -358,7 +358,7 @@ def test(seed, test_loader, num_of_clusters, device, result_path):
 
     model = define_model_cluster_classification(device, num_logits)
     model.to(device)
-    model.load_state_dict(torch.load(os.path.join(result_path, "models_gaussian_grouping_mos", "cluster_classifier_k_{}.pt".format(num_of_clusters))))
+    model.load_state_dict(torch.load(os.path.join(result_path, "cluster_classifier_k_{}.pt".format(num_of_clusters))))
     cri = torch.nn.CrossEntropyLoss().to(device)
     
     model.eval()

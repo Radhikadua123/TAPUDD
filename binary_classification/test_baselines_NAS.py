@@ -1,11 +1,9 @@
-from utils_test import log
 import torch
 import time
 import glob 
 
 import numpy as np
 import torchvision as tv
-from utils_test.test_utils import arg_parser, get_measures, plot_aupr_auroc
 import os
 import cv2
 from PIL import Image
@@ -13,9 +11,14 @@ from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
 from sklearn.linear_model import LogisticRegressionCV
 from torch.autograd import Variable
+
 from utils_test.mahalanobis_lib import get_Mahalanobis_score
 from utils import *
 from dataset import *
+from utils_test.test_utils import arg_parser, get_measures, plot_aupr_auroc
+from utils_test import log
+
+torch.set_num_threads(1)
 
 features = None
 
@@ -337,13 +340,12 @@ if __name__ == "__main__":
     parser.add_argument('--temperature_energy', default=1, type=int,
                         help='temperature scaling for energy')
 
-    # parser.add_argument('--mahalanobis_param_path', help='path to tuned mahalanobis parameters')
     parser.add_argument("--adjust_type", required=True)
     parser.add_argument("--adjust_scale", required=True)
     parser.add_argument("--loader_count", required=True)
     parser.add_argument('--data_path', default="./data", type=str, help='path of the dataset')
     parser.add_argument('--seed', default=0, type=int, help='set seed')
-    parser.add_argument('--result_path', default="./results_22_01", type=str, help='path of model')
+    parser.add_argument('--result_path', default="./results", type=str, help='path of model')
     parser.add_argument('--mahalanobis_param_path', help='path to tuned mahalanobis parameters')
 
     main(parser.parse_args())
