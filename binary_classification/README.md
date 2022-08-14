@@ -37,6 +37,9 @@ Note: before testing Mahalanobis, make sure you have tuned and saved its hyperpa
 bash ./scripts/tune_mahalanobis.sh /home/data_storage/ood_datasets/data/datasets/boneage_data_kaggle/
 ```
 
+## Pretrained models and results
+To directly reproduce the results or to view the results, please download the model weights and results from this [link](https://drive.google.com/drive/folders/1-4xTeiWyFxYE9--DOBoLmR2PqSSO9gok?usp=sharing)
+
 ## OOD Detection Results
 
 ### Results
