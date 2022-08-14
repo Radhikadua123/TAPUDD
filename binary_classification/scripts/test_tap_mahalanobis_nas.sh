@@ -7,7 +7,7 @@ adjust_type=bright
 gmm_random_state=0
 path="./results"
 
-for input_seed in 1 2 3 4 663 1458 1708 1955 7130 ; do
+for input_seed in 0 1 2 3 4 663 1458 1708 1955 7130 ; do
     for clusters in 1 2 3 4 5 6 7 8 9 10; do
         loader_index=1
         for adjust_scale in $(seq 0.0 0.1 1.9) $(seq 2.0 0.5 7.5); do
