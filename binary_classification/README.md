@@ -32,6 +32,8 @@ To reproduce MOS, please run:
 bash ./scripts/test_mos.sh
 ```
 
+To reproduce Gram, please move to the `gram_baseline` directory and run the jupyter notebook.
+
 Note: before testing Mahalanobis, make sure you have tuned and saved its hyperparameters first by running:
 ```
 bash ./scripts/tune_mahalanobis.sh /home/data_storage/ood_datasets/data/datasets/boneage_data_kaggle/
