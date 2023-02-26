@@ -1,19 +1,20 @@
-from utils import log
-import resnetv2
-import torch
-import time
-import torchvision as tv
-import numpy as np
-import argparse
-from dataset import DatasetWithMeta
-from utils.test_utils import get_measures
 import os
-from torch.autograd import Variable
-from utils.mahalanobis_lib import sample_estimator, get_Mahalanobis_score
+import time
+import torch
+import argparse
+import numpy as np
+import torchvision as tv
 import torch.nn as nn
 import pickle5 as pickle
+from torch.autograd import Variable
 from sklearn.linear_model import LogisticRegressionCV
+
+import resnetv2
+from utils import log
+from dataset import DatasetWithMeta
+from utils.test_utils import get_measures
 from utils.test_utils import arg_parser, mk_id_ood
+# from utils.mahalanobis_lib import sample_estimator, get_Mahalanobis_score
 
 torch.cuda.empty_cache()
 
@@ -90,18 +91,19 @@ def main(args):
     logger.info("Moving model onto all GPUs")
     model = torch.nn.DataParallel(model)
     model = model.cuda()
-    dir_path = os.path.join("features", "imagenet", "train")
+    dir_path = os.path.join("checkpoints", "features", "imagenet", "train")
     os.makedirs(dir_path, exist_ok=True)
-    extract_features(model, train_loader, dir_path)
+    if(not os.path.isfile(os.path.join(dir_path,'feats.npy'))):
+        extract_features(model, train_loader, dir_path)
 
     in_set, out_set, in_loader, out_loader = mk_id_ood(args, logger)
 
-    dir_path = os.path.join("features", "id_data")
+    dir_path = os.path.join("checkpoints", "features", "id_data")
     os.makedirs(dir_path, exist_ok=True)
-    extract_features(model, in_loader, dir_path)
-    print("id data done ###########")
+    if(not os.path.isfile(os.path.join(dir_path,'feats.npy'))):
+        extract_features(model, in_loader, dir_path)
 
-    dir_path = os.path.join("features", "ood_data", "textures")
+    dir_path = os.path.join("checkpoints", "features", "ood_data", args.out_data)
     os.makedirs(dir_path, exist_ok=True)
     extract_features(model, out_loader, dir_path)
 
@@ -129,5 +131,6 @@ if __name__ == "__main__":
                         help="Name of this run. Used for monitoring and checkpointing.")
     parser.add_argument("--in_datadir", help="Path to the in-distribution data folder.")
     parser.add_argument("--out_datadir", help="Path to the out-of-distribution data folder.")
+    parser.add_argument("--out_data", type=str, help="Name of the OOD dataset (iNaturalist, SUN, Places, dtd).")
 
     main(parser.parse_args())

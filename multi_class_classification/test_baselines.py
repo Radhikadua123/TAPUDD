@@ -1,16 +1,14 @@
-from utils import log
-import resnetv2
+import os
 import torch
 import time
-
 import numpy as np
-
-from utils.test_utils import arg_parser, mk_id_ood, get_measures, plot_aupr_auroc
-import os
-
 from sklearn.linear_model import LogisticRegressionCV
 from torch.autograd import Variable
+
+import resnetv2
+from utils import log
 from utils.mahalanobis_lib import get_Mahalanobis_score
+from utils.test_utils import arg_parser, mk_id_ood, get_measures, plot_aupr_auroc
 
 
 def iterate_data_msp(data_loader, model):
@@ -227,8 +225,6 @@ def run_eval(model, in_loader, out_loader, logger, args, num_classes):
     logger.info('Recalculating AUROC using sk.auc: {}'.format(auc_roc))
     logger.info('Recalculating AUPR (In) using sk.auc: {}'.format(auc_aupr_in))
     logger.info('Recalculating AUPR (Out) using sk.auc: {}'.format(auc_aupr_out))
-
-
     logger.flush()
 
 

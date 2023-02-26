@@ -162,7 +162,7 @@ def unsupervised_ood_detection(model, logger, args, num_of_clusters, clustering_
     else:
         estimator = GaussianMixture(n_components=num_of_clusters, covariance_type=covar_type, random_state = 0)
     
-    clustering_model_path = f'/home/radhika/mos1/checkpoints/clustering_models/imagenet/num_samples_{args.num_of_samples}'
+    clustering_model_path = f'checkpoints/clustering_models/imagenet/num_samples_{args.num_of_samples}'
     os.makedirs(clustering_model_path, exist_ok=True)
     clustering_model_path_file = os.path.join(clustering_model_path, f'estimator_cluster_{num_of_clusters}.sav')
 
@@ -175,9 +175,9 @@ def unsupervised_ood_detection(model, logger, args, num_of_clusters, clustering_
     
         train_feats_df = []
 
-        dir_path = os.path.join("features", "feats")
+        dir_path = os.path.join("checkpoints/features", "feats")
         np.random.seed(1)
-        train_feats1 = np.load("features/imagenet/train/feats.npy")
+        train_feats1 = np.load("checkpoints/features/imagenet/train/feats.npy")
         print(train_feats1.shape)
         train_feats = train_feats1[np.random.choice(train_feats1.shape[0], args.num_of_samples, replace=False)]
         print(train_feats.shape)
@@ -226,9 +226,9 @@ def unsupervised_ood_detection(model, logger, args, num_of_clusters, clustering_
     ood_feats = []
     in_feats = []
 
-    in_feats.extend(np.load("features/id_data/feats.npy"))
-    if(ood_path == "features/nas_data_imagenet/bright/feats_adjust_scale_1.0.npy" or ood_path == "features/nas_data_imagenet/gaussian_noise/feats_adjust_scale_1.npy"):
-        ood_path = "features/id_data/feats.npy"
+    in_feats.extend(np.load("checkpoints/features/id_data/feats.npy"))
+    if(ood_path == "checkpoints/features/nas_data_imagenet/bright/feats_adjust_scale_1.0.npy" or ood_path == "checkpoints/features/nas_data_imagenet/gaussian_noise/feats_adjust_scale_1.npy"):
+        ood_path = "checkpoints/features/id_data/feats.npy"
         print("OOD same as ID")
     ood_feats.extend(np.load(ood_path))
     in_loader, out_loader = mk_id_ood(ood_feats, in_feats)
@@ -273,7 +273,7 @@ def main(args):
 if __name__ == "__main__":
     parser = arg_parser()
     parser.add_argument("--datadir", required=True)
-    parser.add_argument('--ood_feats_path', help='path to tuned mahalanobis parameters')
+    parser.add_argument('--ood_feats_path', help='path of features of OOD datasets')
     parser.add_argument("--train_list", required=True)
     parser.add_argument("--val_list", required=True)
     parser.add_argument("--num_of_clusters", required=True)

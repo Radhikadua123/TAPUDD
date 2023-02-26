@@ -6,7 +6,6 @@ def setup_logger(args):
     """Creates and returns a fancy logger."""
     # return logging.basicConfig(level=logging.INFO, format="[%(asctime)s] %(message)s")
     # Why is setting up proper logging so !@?#! ugly?
-    # os.makedirs(args.logdir), exist_ok=True)
     print(args.logdir)
     os.makedirs(os.path.join(args.logdir, args.name), exist_ok=True)
     logging.config.dictConfig({
